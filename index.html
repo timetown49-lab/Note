@@ -63,7 +63,8 @@ button.line{background:#06c755;color:#fff}button.mail{background:#3b82f6;color:#
 <div id="app" class="hide">
 <div class="row"><h1>🥐 บันทึกรายการอาหารประจำเดือน</h1><div class="row noprint"><span class="mu" id="me"></span><button class="sec" id="out">ออกจากระบบ</button></div></div>
 <section class="card noprint form"><h2 style="font-size:1.3rem">เพิ่มรายการ</h2>
-<div class="field"><label>1. เลือกลูกค้า</label><select id="cust"></select><button type="button" class="sec hide" id="addCust" style="margin-top:8px">➕ เพิ่มลูกค้าใหม่</button></div>
+<div class="field"><label>1. เลือกลูกค้า</label><select id="cust"></select><button type="button" class="sec hide" id="addCust" style="margin-top:8px">➕ เพิ่มลูกค้าใหม่</button><div class="mu hide" id="addHint" style="margin-top:6px">เพิ่มลูกค้าใหม่ได้เฉพาะผู้ดูแล (หรือเพิ่มแถวในชีต Customers)</div>
+<div id="newCust" class="hide" style="margin-top:10px;padding:12px;border:1px dashed var(--bd);border-radius:10px"><label>ชื่อลูกค้าใหม่</label><input id="ncName" placeholder="เช่น บริษัท ก"><label style="margin-top:10px">เบอร์โทร (ไม่บังคับ)</label><input id="ncPhone" inputmode="tel"><div class="row" style="justify-content:flex-start;margin-top:10px"><button type="button" id="ncSave">บันทึกลูกค้า</button><button type="button" class="sec" id="ncCancel">ยกเลิก</button></div><div class="msg" id="ncMsg"></div></div></div>
 <div class="field"><label>2. เลือกประเภทการบันทึก</label><div class="cats"><button type="button" class="cat on" data-c="อาหาร">🍛 อาหาร</button><button type="button" class="cat" data-c="ขนม">🧁 ขนม</button><button type="button" class="cat" data-c="ไม่มีการส่ง">🚫 ไม่มีการส่ง</button></div></div>
 <div class="field"><label>3. วันที่</label><input type="date" id="date"><div class="dlabel" id="dlabel"></div></div>
 <div id="boxFood">
@@ -120,13 +121,17 @@ function fillCusts(){
 }
 $("cust").onchange=()=>{try{localStorage.setItem("bk-cust",$("cust").value)}catch(e){}};
 $("fcust").onchange=()=>{fc=$("fcust").value;render();renderCards()};
-$("addCust").onclick=async()=>{
-  const nm=(prompt("ชื่อลูกค้าใหม่")||"").trim();if(!nm)return;
-  const phone=(prompt("เบอร์โทร (ไม่บังคับ)")||"").trim();
+$("addCust").onclick=()=>{$("newCust").classList.toggle("hide");$("ncMsg").textContent="";$("ncName").focus()};
+$("ncCancel").onclick=()=>$("newCust").classList.add("hide");
+$("ncSave").onclick=async()=>{
+  const nm=$("ncName").value.trim(),phone=$("ncPhone").value.trim();
+  if(!nm){$("ncMsg").textContent="กรุณากรอกชื่อลูกค้า";return}
+  $("ncSave").disabled=true;$("ncMsg").textContent="กำลังบันทึก...";
   try{const r=await api({action:"addCustomer",cname:nm,phone});
-    if(r.ok){await load();$("cust").value=r.id;try{localStorage.setItem("bk-cust",r.id)}catch(e){}}
-    else $("msg").textContent=r.error==="duplicate"?"มีลูกค้าชื่อนี้อยู่แล้ว":"เพิ่มลูกค้าไม่สำเร็จ ("+r.error+")"}
-  catch(e){$("msg").textContent="เพิ่มลูกค้าไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}};
+    if(r.ok){$("ncName").value="";$("ncPhone").value="";$("newCust").classList.add("hide");await load();$("cust").value=r.id;try{localStorage.setItem("bk-cust",r.id)}catch(e){}}
+    else $("ncMsg").textContent=r.error==="duplicate"?"มีลูกค้าชื่อนี้อยู่แล้ว":r.error==="forbidden"?"เฉพาะผู้ดูแลเท่านั้น":r.error==="unknown_action"?"ระบบหลังบ้านยังเป็นเวอร์ชันเก่า ให้วาง Code.gs ใหม่แล้ว Deploy เป็น New version":"เพิ่มลูกค้าไม่สำเร็จ ("+(r.detail||r.error)+")"}
+  catch(e){$("ncMsg").textContent="เพิ่มลูกค้าไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตหรือการ Deploy"}
+  $("ncSave").disabled=false};
 function dstat(list,withMiss,days){
   const set=days?new Set(days.split(",")):null;const fd=new Set(list.filter(r=>r.category!==NO).map(r=>r.date)),nd={};
   list.filter(r=>r.category===NO).forEach(r=>{nd[r.date]=r.item});
@@ -206,7 +211,7 @@ async function load(){
   $("msg").textContent="กำลังโหลด...";
   try{const r=await api({action:"list",month:$("month").value});
     if(!r.ok){$("msg").textContent=r.error==="auth"?"PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่":"โหลดไม่สำเร็จ";if(r.error==="auth")$("out").click();return}
-    user=r.user;rows=r.rows;custs=r.customers||[];fillCusts();$("addCust").classList.toggle("hide",user.role!=="admin");$("msg").textContent="";render();renderCards()}
+    user=r.user;rows=r.rows;custs=r.customers||[];fillCusts();$("addCust").classList.toggle("hide",user.role!=="admin");$("addHint").classList.toggle("hide",user.role==="admin");$("msg").textContent="";render();renderCards()}
   catch(e){$("msg").textContent="โหลดไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}
 }
 $("month").onchange=load;$("rf").onclick=load;$("print").onclick=()=>window.print();
