@@ -13,42 +13,81 @@
 <meta name="apple-mobile-web-app-title" content="บันทึกอาหาร">
 <title>บันทึกรายการอาหารประจำเดือน</title>
 <style>
-:root{--bg:#fbf5ec;--card:#fff;--tx:#3b2a1e;--mu:#8a7565;--ac:#c0702f;--ac2:#fff;--bd:#eadfce;--dg:#b3392b}
-@media (prefers-color-scheme:dark){:root{--bg:#1f1914;--card:#2b231c;--tx:#f3e8da;--mu:#b09a86;--ac:#e08a4a;--ac2:#1f1914;--bd:#40352b;--dg:#ee7b6c;color-scheme:dark}}
+:root{--bg:#f6f1e9;--card:#ffffff;--tx:#2d2118;--mu:#7a6a5c;--bd:#e7dccb;--field:#faf6ef;--ac:#b5601c;--ac2:#ffffff;--dg:#b3392b;
+--food:#e07a1f;--foodbg:#fff0df;--snack:#d6457f;--snackbg:#ffe6f0;--none:#6b7785;--nonebg:#eceff2;
+--add:#d9822b;--list:#2f6fd0;--listbg:#e8f0fd;--sum:#23894b;--sumbg:#e5f6ec;--pdf:#7a4fd0;--pdfbg:#f0eafc;--set:#0f8b8d;--setbg:#e0f4f4;--warn:#e0a100;--warnbg:#fff4d6;--onc:#ffffff}
+@media (prefers-color-scheme:dark){:root{--bg:#17130f;--card:#241d17;--tx:#f5ebdd;--mu:#b8a592;--bd:#43372c;--field:#1d1712;--ac:#e8934f;--ac2:#1b1510;--dg:#ff8d7d;
+--food:#f0903a;--foodbg:#3a2815;--snack:#f070a6;--snackbg:#3a1b2a;--none:#a3afbc;--nonebg:#2c333a;
+--add:#e8934f;--list:#6aa4ff;--listbg:#1a2740;--sum:#55cc82;--sumbg:#16301f;--pdf:#a98bff;--pdfbg:#2a2140;--set:#4fc6c8;--setbg:#12302f;--warn:#f0b72a;--warnbg:#3a3010;--onc:#1b1510;color-scheme:dark}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:"Sarabun","Noto Sans Thai",system-ui,sans-serif;line-height:1.5;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Sarabun","Noto Sans Thai",system-ui,sans-serif;font-size:17px;line-height:1.55;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 main{max-width:860px;margin:0 auto;padding:14px}
-h1{font-size:1.3rem;margin:4px 0 12px}h2{font-size:1.05rem;margin:0 0 10px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-label{display:block;font-size:.8rem;color:var(--mu);margin-bottom:3px}
-input{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
-button{font:inherit;border:0;border-radius:8px;padding:10px 16px;background:var(--ac);color:var(--ac2);cursor:pointer;font-weight:600}
+h1{font-size:1.35rem;margin:4px 0 12px}h2{font-size:1.1rem;margin:0 0 10px}
+.top{position:sticky;top:0;z-index:5;margin:-14px -14px 16px;padding:12px 14px;background:linear-gradient(135deg,#d9822b,#b3541a);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.brand{font-size:1.3rem;font-weight:800;line-height:1.25}
+.who{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.me{font-size:1.25rem;font-weight:800;background:rgba(255,255,255,.22);padding:7px 16px;border-radius:16px;line-height:1.25}
+.me .mlab{display:block;font-size:.72rem;font-weight:600;opacity:.9}
+.me .adm{font-size:.75rem;background:#fff;color:#b3541a;border-radius:99px;padding:1px 9px;margin-left:6px;vertical-align:middle}
+button.out{background:#fff;color:#b3291a;font-size:1.08rem;padding:11px 20px;min-height:48px;font-weight:800;border-radius:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(60,40,20,.07)}
+.blk{border-top:7px solid var(--c)}
+.s-add{--c:var(--add)}.s-list{--c:var(--list)}.s-sum{--c:var(--sum)}.s-pdf{--c:var(--pdf)}.s-set{--c:var(--set)}
+.blk h2.t{color:var(--c);font-size:1.3rem;margin:0 0 14px}
+.s-sum .mm{font-size:1rem;color:var(--mu);font-weight:600}
+.blk h2:not(.t){font-size:1.08rem;margin:20px 0 8px;padding:4px 0 4px 10px;border-left:6px solid var(--c)}
+label{display:block;font-size:.88rem;color:var(--mu);margin-bottom:4px}
+input,select{width:100%;padding:12px;border:2px solid var(--bd);border-radius:10px;background:var(--field);color:var(--tx);font:inherit}
+input:focus,select:focus{outline:none;border-color:var(--c,var(--ac))}
+.form label{font-size:1.03rem;color:var(--tx);font-weight:700;margin-bottom:6px}
+.form input,.form select{font-size:1.2rem;padding:14px 12px}
+.field{margin-bottom:18px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{font:inherit;border:0;border-radius:10px;padding:11px 18px;min-height:46px;background:var(--ac);color:var(--ac2);cursor:pointer;font-weight:700}
 button:disabled{opacity:.6}
-button.ghost{background:transparent;color:var(--dg);padding:4px 8px;font-weight:400}
-button.sec{background:transparent;color:var(--mu);border:1px solid var(--bd)}
-.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.92rem}
-th,td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
-th{color:var(--mu);font-size:.8rem}td.n,th.n{text-align:right}.day{background:var(--bg);font-weight:700}
-.big{font-size:1.7rem;font-weight:800;color:var(--ac)}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.mu{color:var(--mu);font-size:.85rem}.msg{color:var(--dg);font-size:.85rem;min-height:1.2em;margin-top:6px}
-.form input{font-size:1.15rem;padding:13px 12px}
-.form label{font-size:.95rem;color:var(--tx);font-weight:600;margin-bottom:6px}
-.field{margin-bottom:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.cat{padding:16px 2px;font-size:1.05rem;border-radius:12px;background:var(--bg);color:var(--tx);border:2px solid var(--bd)}
-.cat.on{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
-.sumbox{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:1.4rem;font-weight:800;color:var(--ac);text-align:right}
-#add{width:100%;font-size:1.25rem;padding:16px;border-radius:12px}
-.tag{display:inline-block;padding:1px 10px;border-radius:99px;font-size:.78rem;background:var(--bg);border:1px solid var(--bd)}
-.form select{width:100%;padding:13px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-family:inherit;font-size:1.15rem}
-.stat{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--bd);font-size:.95rem}.chip b{font-size:1.2rem;margin:0 4px}
-.dlabel{margin-top:6px;font-size:1rem;font-weight:600;color:var(--ac)}
-#fcust{padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;max-width:100%}
-.days{display:flex;gap:6px;flex-wrap:wrap}.dy{padding:9px 13px;border-radius:99px;background:var(--bg);color:var(--tx);border:2px solid var(--bd)}.dy.on{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
+button.ghost{background:transparent;color:var(--dg);padding:6px 10px;font-weight:600;min-height:0}
+button.sec{background:transparent;color:var(--mu);border:2px solid var(--bd)}
 button.line{background:#06c755;color:#fff}button.mail{background:#3b82f6;color:#fff}
-#login{max-width:340px;margin:12vh auto}.hide{display:none}
-@media print{.noprint{display:none}body{background:#fff;color:#000}.card{border:0}}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cat{padding:12px 2px;font-size:1.08rem;border-radius:14px;color:var(--tx);border:3px solid var(--bd);min-height:66px;line-height:1.3}
+.cat[data-c="อาหาร"]{border-color:var(--food);background:var(--foodbg)}
+.cat[data-c="ขนม"]{border-color:var(--snack);background:var(--snackbg)}
+.cat[data-c="ไม่มีการส่ง"]{border-color:var(--none);background:var(--nonebg)}
+.cat.on{color:var(--onc);box-shadow:0 3px 8px rgba(0,0,0,.28)}
+.cat[data-c="อาหาร"].on{background:var(--food)}.cat[data-c="ขนม"].on{background:var(--snack)}.cat[data-c="ไม่มีการส่ง"].on{background:var(--none)}
+.sumbox{background:var(--sumbg);border:2px solid var(--sum);border-radius:12px;padding:12px 16px;font-size:1.7rem;font-weight:800;color:var(--sum);text-align:right}
+#add{width:100%;font-size:1.35rem;padding:18px;min-height:62px;border-radius:14px;background:linear-gradient(135deg,#e08a2e,#b5601c);color:#fff;box-shadow:0 4px 10px rgba(180,90,30,.35)}
+.dlabel{margin-top:8px;font-size:1.1rem;font-weight:700;color:var(--add)}
+.msg{color:var(--dg);font-size:.95rem;min-height:1.2em;margin-top:8px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.mu{color:var(--mu);font-size:.9rem}
+#fcust,#month{width:auto;font-size:1rem;padding:11px;border:2px solid var(--bd);border-radius:10px;background:var(--field);color:var(--tx);font-family:inherit;max-width:100%}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:1rem}
+th,td{padding:10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{font-size:.85rem;font-weight:700;color:var(--mu)}
+.s-list th{background:var(--listbg);color:var(--list)}.s-sum th{background:var(--sumbg);color:var(--sum)}
+td.n,th.n{text-align:right}td:first-child,th:first-child{padding-left:14px}
+tr.rf td:first-child{box-shadow:inset 5px 0 0 var(--food)}tr.rs td:first-child{box-shadow:inset 5px 0 0 var(--snack)}tr.rn td:first-child{box-shadow:inset 5px 0 0 var(--none)}tr.rn td{color:var(--mu)}
+tr.day td{background:var(--listbg);color:var(--list);font-weight:800}
+.s-sum tr.day td{background:var(--sumbg);color:var(--sum)}
+.tag{display:inline-block;padding:2px 11px;border-radius:99px;font-size:.85rem;font-weight:700}
+.t-food{background:var(--foodbg);color:var(--food)}.t-snack{background:var(--snackbg);color:var(--snack)}.t-none{background:var(--nonebg);color:var(--none)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.hero{background:linear-gradient(135deg,#2e9d57,#1f7a41);color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px}
+.hero .hl{font-size:.95rem;opacity:.92}.hero .big{font-size:2.2rem;font-weight:800;line-height:1.2}.hero .hs{font-size:.98rem;opacity:.95}
+.stat{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:9px 14px;border-radius:12px;font-size:.98rem;background:var(--card);border:2px solid var(--bd)}.chip b{font-size:1.3rem;margin:0 5px}
+.stat .chip:nth-child(1){background:var(--sumbg);border-color:var(--sum)}
+.stat .chip:nth-child(2){background:var(--nonebg);border-color:var(--none)}
+.stat .chip:nth-child(3){background:var(--warnbg);border-color:var(--warn)}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.dy{padding:10px 15px;border-radius:99px;background:var(--card);color:var(--tx);border:2px solid var(--bd)}
+.dy.on{background:var(--set);color:var(--onc);border-color:var(--set)}
+#login{max-width:360px;margin:10vh auto}.hide{display:none!important}
+.two{align-items:end}
+.s-pdf button:not(.line):not(.mail):not(.sec){background:var(--pdf);color:var(--onc)}
+.s-set #csave{background:var(--set);color:var(--onc)}
+@media (max-width:480px){th,td{padding:9px 6px;font-size:.95rem}th{font-size:.78rem}td:first-child,th:first-child{padding-left:8px}.card{padding:14px}}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}.card{border:0;box-shadow:none}.top{position:static;background:none;color:#000;box-shadow:none;margin:0 0 10px}.top .who{display:none}.hero{background:#fff;color:#000;border:2px solid #000}}
 </style>
 </head>
 <body>
@@ -61,8 +100,8 @@ button.line{background:#06c755;color:#fff}button.mail{background:#3b82f6;color:#
 </section>
 
 <div id="app" class="hide">
-<div class="row"><h1>🥐 บันทึกรายการอาหารประจำเดือน</h1><div class="row noprint"><span class="mu" id="me"></span><button class="sec" id="out">ออกจากระบบ</button></div></div>
-<section class="card noprint form"><h2 style="font-size:1.3rem">เพิ่มรายการ</h2>
+<header class="top"><div class="brand">🍽️ บันทึกรายการอาหารประจำเดือน</div><div class="who noprint"><span class="me" id="me"></span><button class="out" id="out">ออกจากระบบ</button></div></header>
+<section class="card blk s-add noprint form"><h2 class="t">✏️ เพิ่มรายการ</h2>
 <div class="field"><label>1. เลือกลูกค้า</label><select id="cust"></select><button type="button" class="sec hide" id="addCust" style="margin-top:8px">➕ เพิ่มลูกค้าใหม่</button><div class="mu hide" id="addHint" style="margin-top:6px">เพิ่มลูกค้าใหม่ได้เฉพาะผู้ดูแล (หรือเพิ่มแถวในชีต Customers)</div>
 <div id="newCust" class="hide" style="margin-top:10px;padding:12px;border:1px dashed var(--bd);border-radius:10px"><label>ชื่อลูกค้าใหม่</label><input id="ncName" placeholder="เช่น บริษัท ก"><label style="margin-top:10px">เบอร์โทร (ไม่บังคับ)</label><input id="ncPhone" inputmode="tel"><div class="row" style="justify-content:flex-start;margin-top:10px"><button type="button" id="ncSave">บันทึกลูกค้า</button><button type="button" class="sec" id="ncCancel">ยกเลิก</button></div><div class="msg" id="ncMsg"></div></div></div>
 <div class="field"><label>2. เลือกประเภทการบันทึก</label><div class="cats"><button type="button" class="cat on" data-c="อาหาร">🍛 อาหาร</button><button type="button" class="cat" data-c="ขนม">🧁 ขนม</button><button type="button" class="cat" data-c="ไม่มีการส่ง">🚫 ไม่มีการส่ง</button></div></div>
@@ -78,18 +117,18 @@ button.line{background:#06c755;color:#fff}button.mail{background:#3b82f6;color:#
 </div>
 <button id="add">✔ บันทึก</button><div class="msg" id="msg"></div></section>
 
-<section class="card"><div class="row"><h2 style="margin:0">รายการประจำเดือน</h2>
+<section class="card blk s-list"><div class="row"><h2 class="t" style="margin:0">📋 รายการประจำเดือน</h2>
 <div class="row noprint"><select id="fcust"></select><input type="month" id="month" style="width:auto"><button class="sec" id="rf">รีเฟรช</button><button id="print">พิมพ์</button></div></div>
 <div class="wrap" style="margin-top:10px"><table id="log"></table></div></section>
 
-<section class="card"><h2>สรุปยอดสิ้นเดือน — <span id="mlabel"></span></h2>
-<div class="mu">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="mu" id="cnt"></div><div id="daystat" style="margin-top:10px"></div>
+<section class="card blk s-sum"><h2 class="t">📊 สรุปยอดสิ้นเดือน<br><span class="mm" id="mlabel"></span></h2>
+<div class="hero"><div class="hl">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="hs" id="cnt"></div></div><div id="daystat" style="margin-top:10px"></div>
 <h2 style="margin-top:16px">แยกตามลูกค้า (กดที่แถวเพื่อดูรายละเอียด)</h2><div class="wrap"><table id="byCust"></table></div>
 <h2 style="margin-top:16px">แยกตามหมวดหมู่</h2><div class="wrap"><table id="byCat"></table></div>
 <h2 style="margin-top:16px">แยกตามรายการ</h2><div class="wrap"><table id="byItem"></table></div>
 <h2 style="margin-top:16px">แยกตามผู้บันทึก</h2><div class="wrap"><table id="byWho"></table></div></section>
-<section class="card noprint" id="invCard"><h2>📄 ใบสรุปยอดลูกค้า (PDF)</h2><div id="invBody"></div></section>
-<section class="card noprint hide" id="custCard"><h2>⚙️ ข้อมูลลูกค้า (ผู้ดูแล)</h2>
+<section class="card blk s-pdf noprint" id="invCard"><h2 class="t">📄 ใบสรุปยอดลูกค้า (PDF)</h2><div id="invBody"></div></section>
+<section class="card blk s-set noprint hide" id="custCard"><h2 class="t">⚙️ ข้อมูลลูกค้า (ผู้ดูแล)</h2>
 <div class="two"><div><label>เบอร์โทร</label><input id="cphone" inputmode="tel"></div><div><label>อีเมล</label><input id="cemail" type="email"></div></div>
 <label style="margin-top:12px">วันส่งปกติ (ไม่เลือกเลย = ทุกวัน)</label><div class="days" id="cdays"></div>
 <button id="csave" style="margin-top:12px">บันทึกข้อมูลลูกค้า</button><div class="msg" id="cmsg"></div></section>
@@ -190,7 +229,7 @@ async function api(body){
   const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({...cred,...body})});
   return r.json();
 }
-function showApp(){$("login").classList.add("hide");$("app").classList.remove("hide");$("me").textContent="ผู้บันทึก: "+user.name+(user.role==="admin"?" (ผู้ดูแล)":"");
+function showApp(){$("login").classList.add("hide");$("app").classList.remove("hide");$("me").innerHTML='<span class="mlab">ผู้บันทึก</span>👤 '+esc(user.name)+(user.role==="admin"?' <span class="adm">ผู้ดูแล</span>':"");
   $("date").value=today();updD();$("month").value=today().slice(0,7);load()}
 $("lb").onclick=async()=>{
   cred={name:$("ln").value.trim(),pin:$("lp").value.trim()};
@@ -250,7 +289,7 @@ function render(){
     if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="7">${thDate(r.date)}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
     const t=r.qty*r.price;grand+=t;const tm=r.ts?new Date(r.ts).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):"";
     const can=r.member===user.name||user.role==="admin";
-    h+=`<tr><td>${tm}</td><td>${esc(cn(r.cust))}</td><td>${esc(r.member)}</td><td><span class="tag">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":r.category===NO?"🚫":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td>${r.category===NO?'<td class="n">-</td><td class="n">-</td><td class="n">-</td>':`<td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td>`}<td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}','${r.date}')">ลบ</button>`:""}</td></tr>`});
+    h+=`<tr class="${r.category==="ขนม"?"rs":r.category===NO?"rn":"rf"}"><td>${tm}</td><td>${esc(cn(r.cust))}</td><td>${esc(r.member)}</td><td><span class="tag ${r.category==="ขนม"?"t-snack":r.category===NO?"t-none":"t-food"}">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":r.category===NO?"🚫":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td>${r.category===NO?'<td class="n">-</td><td class="n">-</td><td class="n">-</td>':`<td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td>`}<td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}','${r.date}')">ลบ</button>`:""}</td></tr>`});
   $("log").innerHTML=h;$("grand").textContent=fmt(grand)+" บาท";
   $("cnt").textContent=`${F.length} รายการ · ${F.reduce((s,r)=>s+r.qty,0)} ชิ้น`;
   const act=custs.filter(c=>c.active||rows.some(r=>r.cust===c.id));
@@ -258,8 +297,8 @@ function render(){
   const grp=f=>{const g={};F.forEach(r=>{const k=f(r),x=g[k]||(g[k]={q:0,t:0,n:0});x.q+=r.qty;x.t+=r.qty*r.price;x.n++});return Object.entries(g).sort((a,b)=>b[1].t-a[1].t)};
   const all=rows.filter(r=>r.category!==NO),gt=all.reduce((s,r)=>s+r.qty*r.price,0),cg={};
   all.forEach(r=>{const x=cg[r.cust]||(cg[r.cust]={d:new Set(),q:0,t:0});x.d.add(r.date);x.q+=r.qty;x.t+=r.qty*r.price});
-  $("byCust").innerHTML="<tr><th>ลูกค้า</th><th class=n>วันที่ส่ง</th><th class=n>จำนวนชิ้น</th><th class=n>ยอดรวม</th><th class=n>สัดส่วน</th></tr>"+(Object.entries(cg).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr style="cursor:pointer" onclick="pick('${esc(k)}')"><td><b>${esc(cn(k))}</b></td><td class="n">${v.d.size}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${gt>0?Math.round(v.t/gt*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>')+(Object.keys(cg).length>1?`<tr class="day"><td>รวมทุกลูกค้า</td><td></td><td class="n">${all.reduce((s,r)=>s+r.qty,0)}</td><td class="n">${fmt(gt)}</td><td></td></tr>`:"");
-  $("byCat").innerHTML="<tr><th>หมวดหมู่</th><th class=n>รายการ</th><th class=n>จำนวนชิ้น</th><th class=n>ยอดรวม</th><th class=n>สัดส่วน</th></tr>"+(grp(r=>r.category||"ไม่ระบุหมวด").map(([k,v])=>`<tr><td><b>${esc(k)}</b></td><td class="n">${v.n}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${grand>0?Math.round(v.t/grand*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>');
+  $("byCust").innerHTML="<tr><th>ลูกค้า</th><th class=n>วัน</th><th class=n>ชิ้น</th><th class=n>ยอดรวม</th><th class=n>%</th></tr>"+(Object.entries(cg).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr style="cursor:pointer" onclick="pick('${esc(k)}')"><td><b>${esc(cn(k))}</b></td><td class="n">${v.d.size}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${gt>0?Math.round(v.t/gt*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>')+(Object.keys(cg).length>1?`<tr class="day"><td>รวมทุกลูกค้า</td><td></td><td class="n">${all.reduce((s,r)=>s+r.qty,0)}</td><td class="n">${fmt(gt)}</td><td></td></tr>`:"");
+  $("byCat").innerHTML="<tr><th>หมวด</th><th class=n>ครั้ง</th><th class=n>ชิ้น</th><th class=n>ยอดรวม</th><th class=n>%</th></tr>"+(grp(r=>r.category||"ไม่ระบุหมวด").map(([k,v])=>`<tr><td><span class="dot" style="background:${k==="ขนม"?"var(--snack)":k==="อาหาร"?"var(--food)":"var(--none)"}"></span><b>${esc(k)}</b></td><td class="n">${v.n}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${grand>0?Math.round(v.t/grand*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>');
   $("byItem").innerHTML="<tr><th>รายการ</th><th class=n>จำนวนรวม</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.item).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>');
   $("byWho").innerHTML="<tr><th>ผู้บันทึก</th><th class=n>จำนวนครั้ง</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.member).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.n}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>')}
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
