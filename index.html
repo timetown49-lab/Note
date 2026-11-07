@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#c0702f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="บันทึกอาหาร">
+<title>บันทึกรายการอาหารประจำเดือน</title>
+<style>
+:root{--bg:#fbf5ec;--card:#fff;--tx:#3b2a1e;--mu:#8a7565;--ac:#c0702f;--ac2:#fff;--bd:#eadfce;--dg:#b3392b}
+@media (prefers-color-scheme:dark){:root{--bg:#1f1914;--card:#2b231c;--tx:#f3e8da;--mu:#b09a86;--ac:#e08a4a;--ac2:#1f1914;--bd:#40352b;--dg:#ee7b6c;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Sarabun","Noto Sans Thai",system-ui,sans-serif;line-height:1.5;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:860px;margin:0 auto;padding:14px}
+h1{font-size:1.3rem;margin:4px 0 12px}h2{font-size:1.05rem;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:.8rem;color:var(--mu);margin-bottom:3px}
+input{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+button{font:inherit;border:0;border-radius:8px;padding:10px 16px;background:var(--ac);color:var(--ac2);cursor:pointer;font-weight:600}
+button:disabled{opacity:.6}
+button.ghost{background:transparent;color:var(--dg);padding:4px 8px;font-weight:400}
+button.sec{background:transparent;color:var(--mu);border:1px solid var(--bd)}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{color:var(--mu);font-size:.8rem}td.n,th.n{text-align:right}.day{background:var(--bg);font-weight:700}
+.big{font-size:1.7rem;font-weight:800;color:var(--ac)}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.mu{color:var(--mu);font-size:.85rem}.msg{color:var(--dg);font-size:.85rem;min-height:1.2em;margin-top:6px}
+#login{max-width:340px;margin:12vh auto}.hide{display:none}
+@media print{.noprint{display:none}body{background:#fff;color:#000}.card{border:0}}
+</style>
+</head>
+<body>
+<main>
+<section id="login" class="card">
+<h1>🥐 เข้าสู่ระบบผู้บันทึก</h1>
+<label>ชื่อผู้บันทึก</label><input id="ln" autocomplete="username">
+<label style="margin-top:10px">PIN</label><input id="lp" type="password" inputmode="numeric" autocomplete="current-password">
+<div style="margin-top:12px"><button id="lb">เข้าสู่ระบบ</button></div><div class="msg" id="lm"></div>
+</section>
+
+<div id="app" class="hide">
+<div class="row"><h1>🥐 บันทึกรายการอาหารประจำเดือน</h1><div class="row noprint"><span class="mu" id="me"></span><button class="sec" id="out">ออกจากระบบ</button></div></div>
+<section class="card noprint"><h2>เพิ่มรายการ</h2>
+<div class="grid">
+<div><label>วันที่</label><input type="date" id="date"></div>
+<div><label>ชื่อรายการ *</label><input id="item" list="items" placeholder="เช่น ครัวซองต์"><datalist id="items"></datalist></div>
+<div><label>จำนวน</label><input type="number" id="qty" min="1" value="1" inputmode="numeric"></div>
+<div><label>ราคาต่อหน่วย (บาท)</label><input type="number" id="price" min="0" step="0.5" value="0" inputmode="decimal"></div>
+<div><label>รวม (บาท)</label><input id="sum" readonly></div>
+</div>
+<div style="margin-top:12px"><button id="add">บันทึก</button></div><div class="msg" id="msg"></div></section>
+
+<section class="card"><div class="row"><h2 style="margin:0">รายการประจำเดือน</h2>
+<div class="row noprint"><input type="month" id="month" style="width:auto"><button class="sec" id="rf">รีเฟรช</button><button id="print">พิมพ์</button></div></div>
+<div class="wrap" style="margin-top:10px"><table id="log"></table></div></section>
+
+<section class="card"><h2>สรุปยอดสิ้นเดือน — <span id="mlabel"></span></h2>
+<div class="mu">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="mu" id="cnt"></div>
+<h2 style="margin-top:16px">แยกตามรายการ</h2><div class="wrap"><table id="byItem"></table></div>
+<h2 style="margin-top:16px">แยกตามผู้บันทึก</h2><div class="wrap"><table id="byWho"></table></div></section>
+</div>
+</main>
+<script>
+// ===== ตั้งค่า: วาง URL ของ Apps Script Web app (ลงท้ายด้วย /exec) =====
+const API_URL="https://script.google.com/macros/s/AKfycbx9ij0KB1KWkhH14x1bheTKEYWjkSYBEYdX1zqnvUTDmQL1Oosdvj9TvhRSHPehGmJ5/exec";
+// =====================================================================
+const $=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+let cred=null,user=null,rows=[];
+try{cred=JSON.parse(localStorage.getItem("bk-cred")||"null")}catch(e){}
+
+async function api(body){
+  const r=await fetch(API_URL,{method:"POST",body:JSON.stringify({...cred,...body})});
+  return r.json();
+}
+function showApp(){$("login").classList.add("hide");$("app").classList.remove("hide");$("me").textContent="ผู้บันทึก: "+user.name+(user.role==="admin"?" (ผู้ดูแล)":"");
+  $("date").value=today();$("month").value=today().slice(0,7);load()}
+$("lb").onclick=async()=>{
+  cred={name:$("ln").value.trim(),pin:$("lp").value.trim()};
+  if(!cred.name||!cred.pin){$("lm").textContent="กรุณากรอกชื่อและ PIN";return}
+  $("lb").disabled=true;$("lm").textContent="";
+  try{const r=await api({action:"login"});
+    if(r.ok){user=r.user;try{localStorage.setItem("bk-cred",JSON.stringify(cred))}catch(e){}showApp()}
+    else $("lm").textContent=r.error==="auth"?"ชื่อหรือ PIN ไม่ถูกต้อง":"เกิดข้อผิดพลาด"}
+  catch(e){$("lm").textContent="เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ตและ API_URL"}
+  $("lb").disabled=false};
+$("out").onclick=()=>{try{localStorage.removeItem("bk-cred")}catch(e){}location.reload()};
+const calc=()=>{$("sum").value=fmt((+$("qty").value||0)*(+$("price").value||0))};
+["qty","price"].forEach(i=>$(i).addEventListener("input",calc));calc();
+
+async function load(){
+  $("msg").textContent="กำลังโหลด...";
+  try{const r=await api({action:"list",month:$("month").value});
+    if(!r.ok){$("msg").textContent=r.error==="auth"?"PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่":"โหลดไม่สำเร็จ";if(r.error==="auth")$("out").click();return}
+    user=r.user;rows=r.rows;$("msg").textContent="";render()}
+  catch(e){$("msg").textContent="โหลดไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}
+}
+$("month").onchange=load;$("rf").onclick=load;$("print").onclick=()=>window.print();
+$("add").onclick=async()=>{
+  const item=$("item").value.trim(),date=$("date").value,qty=+$("qty").value||0,price=+$("price").value||0;
+  if(!item||!date){$("msg").textContent="กรุณากรอกวันที่และชื่อรายการ";return}
+  if(qty<=0){$("msg").textContent="จำนวนต้องมากกว่า 0";return}
+  $("add").disabled=true;
+  try{const r=await api({action:"add",date,item,qty,price});
+    if(r.ok){$("item").value="";$("qty").value=1;calc();if(date.slice(0,7)!==$("month").value)$("month").value=date.slice(0,7);await load()}
+    else $("msg").textContent="บันทึกไม่สำเร็จ ("+r.error+")"}
+  catch(e){$("msg").textContent="บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}
+  $("add").disabled=false};
+window.del=async id=>{if(!confirm("ลบรายการนี้?"))return;
+  try{const r=await api({action:"delete",id});if(r.ok)load();else $("msg").textContent="ลบไม่สำเร็จ ("+r.error+")"}catch(e){$("msg").textContent="ลบไม่สำเร็จ"}};
+
+function render(){
+  const R=[...rows].sort((a,b)=>a.date.localeCompare(b.date)||(a.ts||"").localeCompare(b.ts||""));
+  $("items").innerHTML=[...new Set(R.map(r=>r.item))].map(i=>`<option value="${esc(i)}">`).join("");
+  $("mlabel").textContent=new Date($("month").value+"-01").toLocaleDateString("th-TH",{month:"long",year:"numeric"});
+  const dayTot={};R.forEach(r=>{dayTot[r.date]=(dayTot[r.date]||0)+r.qty*r.price});
+  let h="<tr><th>เวลา</th><th>ผู้บันทึก</th><th>รายการ</th><th class=n>จำนวน</th><th class=n>ราคา/หน่วย</th><th class=n>รวม</th><th class=noprint></th></tr>";
+  if(!R.length)h+='<tr><td colspan="7" class="mu">ยังไม่มีรายการในเดือนนี้</td></tr>';
+  let cur="",grand=0;
+  R.forEach(r=>{
+    if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="5">${new Date(r.date).toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
+    const t=r.qty*r.price;grand+=t;const tm=r.ts?new Date(r.ts).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):"";
+    const can=r.member===user.name||user.role==="admin";
+    h+=`<tr><td>${tm}</td><td>${esc(r.member)}</td><td>${esc(r.item)}</td><td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td><td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}')">ลบ</button>`:""}</td></tr>`});
+  $("log").innerHTML=h;$("grand").textContent=fmt(grand)+" บาท";
+  $("cnt").textContent=`${R.length} รายการ · ${R.reduce((s,r)=>s+r.qty,0)} ชิ้น`;
+  const grp=f=>{const g={};R.forEach(r=>{const k=f(r),x=g[k]||(g[k]={q:0,t:0,n:0});x.q+=r.qty;x.t+=r.qty*r.price;x.n++});return Object.entries(g).sort((a,b)=>b[1].t-a[1].t)};
+  $("byItem").innerHTML="<tr><th>รายการ</th><th class=n>จำนวนรวม</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.item).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>');
+  $("byWho").innerHTML="<tr><th>ผู้บันทึก</th><th class=n>จำนวนครั้ง</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.member).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.n}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>')}
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+(async()=>{if(cred){try{const r=await api({action:"login"});if(r.ok){user=r.user;showApp();return}}catch(e){}}
+ if(cred){$("ln").value=cred.name||""}})();
+</script>
+</body>
+</html>
