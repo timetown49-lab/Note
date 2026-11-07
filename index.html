@@ -35,12 +35,15 @@ th{color:var(--mu);font-size:.8rem}td.n,th.n{text-align:right}.day{background:va
 .form input{font-size:1.15rem;padding:13px 12px}
 .form label{font-size:.95rem;color:var(--tx);font-weight:600;margin-bottom:6px}
 .field{margin-bottom:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cat{padding:16px 8px;font-size:1.25rem;border-radius:12px;background:var(--bg);color:var(--tx);border:2px solid var(--bd)}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cat{padding:16px 2px;font-size:1.05rem;border-radius:12px;background:var(--bg);color:var(--tx);border:2px solid var(--bd)}
 .cat.on{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
 .sumbox{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px 14px;font-size:1.4rem;font-weight:800;color:var(--ac);text-align:right}
 #add{width:100%;font-size:1.25rem;padding:16px;border-radius:12px}
 .tag{display:inline-block;padding:1px 10px;border-radius:99px;font-size:.78rem;background:var(--bg);border:1px solid var(--bd)}
+.form select{width:100%;padding:13px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-family:inherit;font-size:1.15rem}
+.stat{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--bd);font-size:.95rem}.chip b{font-size:1.2rem;margin:0 4px}
+.dlabel{margin-top:6px;font-size:1rem;font-weight:600;color:var(--ac)}
 #login{max-width:340px;margin:12vh auto}.hide{display:none}
 @media print{.noprint{display:none}body{background:#fff;color:#000}.card{border:0}}
 </style>
@@ -57,11 +60,17 @@ th{color:var(--mu);font-size:.8rem}td.n,th.n{text-align:right}.day{background:va
 <div id="app" class="hide">
 <div class="row"><h1>🥐 บันทึกรายการอาหารประจำเดือน</h1><div class="row noprint"><span class="mu" id="me"></span><button class="sec" id="out">ออกจากระบบ</button></div></div>
 <section class="card noprint form"><h2 style="font-size:1.3rem">เพิ่มรายการ</h2>
-<div class="field"><label>1. เลือกหมวดหมู่</label><div class="cats"><button type="button" class="cat on" data-c="อาหาร">🍛 อาหาร</button><button type="button" class="cat" data-c="ขนม">🧁 ขนม</button></div></div>
-<div class="field"><label>2. วันที่</label><input type="date" id="date"></div>
+<div class="field"><label>1. เลือกประเภทการบันทึก</label><div class="cats"><button type="button" class="cat on" data-c="อาหาร">🍛 อาหาร</button><button type="button" class="cat" data-c="ขนม">🧁 ขนม</button><button type="button" class="cat" data-c="ไม่มีการส่ง">🚫 ไม่มีการส่ง</button></div></div>
+<div class="field"><label>2. วันที่</label><input type="date" id="date"><div class="dlabel" id="dlabel"></div></div>
+<div id="boxFood">
 <div class="field"><label>3. ชื่อรายการ</label><input id="item" list="items" placeholder="เช่น ข้าวผัด / ครัวซองต์"><datalist id="items"></datalist></div>
 <div class="two field"><div><label>4. จำนวน</label><input type="number" id="qty" min="1" value="1" inputmode="numeric"></div><div><label>5. ราคาต่อหน่วย (บาท)</label><input type="number" id="price" min="0" step="0.5" value="0" inputmode="decimal"></div></div>
 <div class="field"><label>ยอดรวม (บาท)</label><div class="sumbox" id="sumbox">0.00</div></div>
+</div>
+<div id="boxNo" class="hide">
+<div class="field"><label>3. เหตุผลที่ไม่มีการส่ง</label><select id="reason"><option>วันหยุด</option><option>ร้านปิด</option><option>ไม่มีออเดอร์</option><option>สภาพอากาศ</option><option>อื่นๆ</option></select></div>
+<div class="field"><label>หมายเหตุ (ถ้ามี)</label><input id="note" placeholder="เช่น ปิดปรับปรุงร้าน"></div>
+</div>
 <button id="add">✔ บันทึก</button><div class="msg" id="msg"></div></section>
 
 <section class="card"><div class="row"><h2 style="margin:0">รายการประจำเดือน</h2>
@@ -69,7 +78,7 @@ th{color:var(--mu);font-size:.8rem}td.n,th.n{text-align:right}.day{background:va
 <div class="wrap" style="margin-top:10px"><table id="log"></table></div></section>
 
 <section class="card"><h2>สรุปยอดสิ้นเดือน — <span id="mlabel"></span></h2>
-<div class="mu">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="mu" id="cnt"></div>
+<div class="mu">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="mu" id="cnt"></div><div id="daystat" style="margin-top:10px"></div>
 <h2 style="margin-top:16px">แยกตามหมวดหมู่</h2><div class="wrap"><table id="byCat"></table></div>
 <h2 style="margin-top:16px">แยกตามรายการ</h2><div class="wrap"><table id="byItem"></table></div>
 <h2 style="margin-top:16px">แยกตามผู้บันทึก</h2><div class="wrap"><table id="byWho"></table></div></section>
@@ -83,6 +92,11 @@ const $=id=>document.getElementById(id);
 const fmt=n=>n.toLocaleString("th-TH",{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const WD=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"],WS=["อา.","จ.","อ.","พ.","พฤ.","ศ.","ส."],MN=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const pd=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const thDate=s=>{const d=pd(s);return `วัน${WD[d.getDay()]}ที่ ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()+543}`};
+const thShort=s=>{const d=pd(s);return `${WS[d.getDay()]} ${d.getDate()} ${MN[d.getMonth()]}`};
+const NO="ไม่มีการส่ง";
 let cred=null,user=null,rows=[],cat="อาหาร";
 try{cred=JSON.parse(localStorage.getItem("bk-cred")||"null")}catch(e){}
 
@@ -91,7 +105,7 @@ async function api(body){
   return r.json();
 }
 function showApp(){$("login").classList.add("hide");$("app").classList.remove("hide");$("me").textContent="ผู้บันทึก: "+user.name+(user.role==="admin"?" (ผู้ดูแล)":"");
-  $("date").value=today();$("month").value=today().slice(0,7);load()}
+  $("date").value=today();updD();$("month").value=today().slice(0,7);load()}
 $("lb").onclick=async()=>{
   cred={name:$("ln").value.trim(),pin:$("lp").value.trim()};
   if(!cred.name||!cred.pin){$("lm").textContent="กรุณากรอกชื่อและ PIN";return}
@@ -104,7 +118,8 @@ $("lb").onclick=async()=>{
 $("out").onclick=()=>{try{localStorage.removeItem("bk-cred")}catch(e){}location.reload()};
 const calc=()=>{$("sumbox").textContent=fmt((+$("qty").value||0)*(+$("price").value||0))};
 ["qty","price"].forEach(i=>$(i).addEventListener("input",calc));calc();
-document.querySelectorAll(".cat").forEach(b=>b.onclick=()=>{cat=b.dataset.c;document.querySelectorAll(".cat").forEach(x=>x.classList.toggle("on",x===b))});
+document.querySelectorAll(".cat").forEach(b=>b.onclick=()=>{cat=b.dataset.c;document.querySelectorAll(".cat").forEach(x=>x.classList.toggle("on",x===b));$("boxFood").classList.toggle("hide",cat===NO);$("boxNo").classList.toggle("hide",cat!==NO);$("msg").textContent=""});
+const updD=()=>{$("dlabel").textContent=$("date").value?thDate($("date").value):""};["input","change"].forEach(e=>$("date").addEventListener(e,updD));
 
 async function load(){
   $("msg").textContent="กำลังโหลด...";
@@ -115,12 +130,20 @@ async function load(){
 }
 $("month").onchange=load;$("rf").onclick=load;$("print").onclick=()=>window.print();
 $("add").onclick=async()=>{
-  const item=$("item").value.trim(),date=$("date").value,qty=+$("qty").value||0,price=+$("price").value||0;
-  if(!item||!date){$("msg").textContent="กรุณากรอกวันที่และชื่อรายการ";return}
-  if(qty<=0){$("msg").textContent="จำนวนต้องมากกว่า 0";return}
+  const date=$("date").value,no=cat===NO;let item,qty,price;
+  if(!date){$("msg").textContent="กรุณาเลือกวันที่";return}
+  if(no){
+    const nt=$("note").value.trim();item=$("reason").value+(nt?" - "+nt:"");qty=0;price=0;
+    if(rows.some(r=>r.date===date&&r.category===NO)){$("msg").textContent="วันนี้บันทึกว่าไม่มีการส่งไว้แล้ว";return}
+    if(rows.some(r=>r.date===date&&r.category!==NO)&&!confirm(thDate(date)+" มีรายการอาหารบันทึกไว้แล้ว ต้องการบันทึกว่าไม่มีการส่งด้วยหรือไม่?"))return;
+  }else{
+    item=$("item").value.trim();qty=+$("qty").value||0;price=+$("price").value||0;
+    if(!item){$("msg").textContent="กรุณากรอกชื่อรายการ";return}
+    if(qty<=0){$("msg").textContent="จำนวนต้องมากกว่า 0";return}
+  }
   $("add").disabled=true;
   try{const r=await api({action:"add",date,item,qty,price,category:cat});
-    if(r.ok){$("item").value="";$("qty").value=1;calc();if(date.slice(0,7)!==$("month").value)$("month").value=date.slice(0,7);await load()}
+    if(r.ok){$("item").value="";$("note").value="";$("qty").value=1;calc();if(date.slice(0,7)!==$("month").value)$("month").value=date.slice(0,7);await load()}
     else $("msg").textContent="บันทึกไม่สำเร็จ ("+r.error+")"}
   catch(e){$("msg").textContent="บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}
   $("add").disabled=false};
@@ -129,20 +152,26 @@ window.del=async id=>{if(!confirm("ลบรายการนี้?"))return;
 
 function render(){
   const R=[...rows].sort((a,b)=>a.date.localeCompare(b.date)||(a.ts||"").localeCompare(b.ts||""));
-  $("items").innerHTML=[...new Set(R.map(r=>r.item))].map(i=>`<option value="${esc(i)}">`).join("");
+  const F=R.filter(r=>r.category!==NO);
+  $("items").innerHTML=[...new Set(F.map(r=>r.item))].map(i=>`<option value="${esc(i)}">`).join("");
   $("mlabel").textContent=new Date($("month").value+"-01").toLocaleDateString("th-TH",{month:"long",year:"numeric"});
   const dayTot={};R.forEach(r=>{dayTot[r.date]=(dayTot[r.date]||0)+r.qty*r.price});
   let h="<tr><th>เวลา</th><th>ผู้บันทึก</th><th>หมวด</th><th>รายการ</th><th class=n>จำนวน</th><th class=n>ราคา/หน่วย</th><th class=n>รวม</th><th class=noprint></th></tr>";
   if(!R.length)h+='<tr><td colspan="8" class="mu">ยังไม่มีรายการในเดือนนี้</td></tr>';
   let cur="",grand=0;
   R.forEach(r=>{
-    if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="6">${new Date(r.date).toLocaleDateString("th-TH",{weekday:"short",day:"numeric",month:"short",year:"numeric"})}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
+    if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="6">${thDate(r.date)}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
     const t=r.qty*r.price;grand+=t;const tm=r.ts?new Date(r.ts).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):"";
     const can=r.member===user.name||user.role==="admin";
-    h+=`<tr><td>${tm}</td><td>${esc(r.member)}</td><td><span class="tag">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td><td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td><td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}')">ลบ</button>`:""}</td></tr>`});
+    h+=`<tr><td>${tm}</td><td>${esc(r.member)}</td><td><span class="tag">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":r.category===NO?"🚫":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td>${r.category===NO?'<td class="n">-</td><td class="n">-</td><td class="n">-</td>':`<td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td>`}<td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}')">ลบ</button>`:""}</td></tr>`});
   $("log").innerHTML=h;$("grand").textContent=fmt(grand)+" บาท";
-  $("cnt").textContent=`${R.length} รายการ · ${R.reduce((s,r)=>s+r.qty,0)} ชิ้น`;
-  const grp=f=>{const g={};R.forEach(r=>{const k=f(r),x=g[k]||(g[k]={q:0,t:0,n:0});x.q+=r.qty;x.t+=r.qty*r.price;x.n++});return Object.entries(g).sort((a,b)=>b[1].t-a[1].t)};
+  $("cnt").textContent=`${F.length} รายการ · ${F.reduce((s,r)=>s+r.qty,0)} ชิ้น`;
+  const fd=new Set(F.map(r=>r.date)),nd={};R.filter(r=>r.category===NO).forEach(r=>{nd[r.date]=r.item});
+  const [yy,mm]=$("month").value.split("-").map(Number),td=pd(today()),dim=new Date(yy,mm,0).getDate(),miss=[];
+  for(let i=1;i<=dim;i++){const ds=`${yy}-${String(mm).padStart(2,"0")}-${String(i).padStart(2,"0")}`;if(pd(ds)<td&&!fd.has(ds)&&!(ds in nd))miss.push(ds)}
+  const nds=Object.keys(nd).sort();
+  $("daystat").innerHTML=`<div class="stat"><div class="chip">✅ มีการส่ง<b>${fd.size}</b>วัน</div><div class="chip">🚫 ไม่มีการส่ง<b>${nds.length}</b>วัน</div><div class="chip">⚠️ ยังไม่ได้บันทึก<b>${miss.length}</b>วัน</div></div>`+(nds.length?`<div class="mu" style="margin-top:8px">🚫 ไม่มีการส่ง: ${nds.map(d=>esc(thShort(d)+" ("+nd[d]+")")).join(" · ")}</div>`:"")+(miss.length?`<div style="margin-top:8px;color:var(--dg);font-size:.9rem">⚠️ ยังไม่ได้บันทึก (ไม่มีทั้งรายการและการแจ้งว่าไม่มีการส่ง): ${miss.map(thShort).join(" · ")}</div>`:"");
+  const grp=f=>{const g={};F.forEach(r=>{const k=f(r),x=g[k]||(g[k]={q:0,t:0,n:0});x.q+=r.qty;x.t+=r.qty*r.price;x.n++});return Object.entries(g).sort((a,b)=>b[1].t-a[1].t)};
   $("byCat").innerHTML="<tr><th>หมวดหมู่</th><th class=n>รายการ</th><th class=n>จำนวนชิ้น</th><th class=n>ยอดรวม</th><th class=n>สัดส่วน</th></tr>"+(grp(r=>r.category||"ไม่ระบุหมวด").map(([k,v])=>`<tr><td><b>${esc(k)}</b></td><td class="n">${v.n}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${grand>0?Math.round(v.t/grand*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>');
   $("byItem").innerHTML="<tr><th>รายการ</th><th class=n>จำนวนรวม</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.item).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>');
   $("byWho").innerHTML="<tr><th>ผู้บันทึก</th><th class=n>จำนวนครั้ง</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.member).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.n}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>')}
