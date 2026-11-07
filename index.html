@@ -44,6 +44,9 @@ th{color:var(--mu);font-size:.8rem}td.n,th.n{text-align:right}.day{background:va
 .form select{width:100%;padding:13px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-family:inherit;font-size:1.15rem}
 .stat{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--bd);font-size:.95rem}.chip b{font-size:1.2rem;margin:0 4px}
 .dlabel{margin-top:6px;font-size:1rem;font-weight:600;color:var(--ac)}
+#fcust{padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;max-width:100%}
+.days{display:flex;gap:6px;flex-wrap:wrap}.dy{padding:9px 13px;border-radius:99px;background:var(--bg);color:var(--tx);border:2px solid var(--bd)}.dy.on{background:var(--ac);color:var(--ac2);border-color:var(--ac)}
+button.line{background:#06c755;color:#fff}button.mail{background:#3b82f6;color:#fff}
 #login{max-width:340px;margin:12vh auto}.hide{display:none}
 @media print{.noprint{display:none}body{background:#fff;color:#000}.card{border:0}}
 </style>
@@ -60,28 +63,35 @@ th{color:var(--mu);font-size:.8rem}td.n,th.n{text-align:right}.day{background:va
 <div id="app" class="hide">
 <div class="row"><h1>🥐 บันทึกรายการอาหารประจำเดือน</h1><div class="row noprint"><span class="mu" id="me"></span><button class="sec" id="out">ออกจากระบบ</button></div></div>
 <section class="card noprint form"><h2 style="font-size:1.3rem">เพิ่มรายการ</h2>
-<div class="field"><label>1. เลือกประเภทการบันทึก</label><div class="cats"><button type="button" class="cat on" data-c="อาหาร">🍛 อาหาร</button><button type="button" class="cat" data-c="ขนม">🧁 ขนม</button><button type="button" class="cat" data-c="ไม่มีการส่ง">🚫 ไม่มีการส่ง</button></div></div>
-<div class="field"><label>2. วันที่</label><input type="date" id="date"><div class="dlabel" id="dlabel"></div></div>
+<div class="field"><label>1. เลือกลูกค้า</label><select id="cust"></select><button type="button" class="sec hide" id="addCust" style="margin-top:8px">➕ เพิ่มลูกค้าใหม่</button></div>
+<div class="field"><label>2. เลือกประเภทการบันทึก</label><div class="cats"><button type="button" class="cat on" data-c="อาหาร">🍛 อาหาร</button><button type="button" class="cat" data-c="ขนม">🧁 ขนม</button><button type="button" class="cat" data-c="ไม่มีการส่ง">🚫 ไม่มีการส่ง</button></div></div>
+<div class="field"><label>3. วันที่</label><input type="date" id="date"><div class="dlabel" id="dlabel"></div></div>
 <div id="boxFood">
-<div class="field"><label>3. ชื่อรายการ</label><input id="item" list="items" placeholder="เช่น ข้าวผัด / ครัวซองต์"><datalist id="items"></datalist></div>
-<div class="two field"><div><label>4. จำนวน</label><input type="number" id="qty" min="1" value="1" inputmode="numeric"></div><div><label>5. ราคาต่อหน่วย (บาท)</label><input type="number" id="price" min="0" step="0.5" value="0" inputmode="decimal"></div></div>
+<div class="field"><label>4. ชื่อรายการ</label><input id="item" list="items" placeholder="เช่น ข้าวผัด / ครัวซองต์"><datalist id="items"></datalist></div>
+<div class="two field"><div><label>5. จำนวน</label><input type="number" id="qty" min="1" value="1" inputmode="numeric"></div><div><label>6. ราคาต่อหน่วย (บาท)</label><input type="number" id="price" min="0" step="0.5" value="0" inputmode="decimal"></div></div>
 <div class="field"><label>ยอดรวม (บาท)</label><div class="sumbox" id="sumbox">0.00</div></div>
 </div>
 <div id="boxNo" class="hide">
-<div class="field"><label>3. เหตุผลที่ไม่มีการส่ง</label><select id="reason"><option>วันหยุด</option><option>ร้านปิด</option><option>ไม่มีออเดอร์</option><option>สภาพอากาศ</option><option>อื่นๆ</option></select></div>
+<div class="field"><label>4. เหตุผลที่ไม่มีการส่ง</label><select id="reason"><option>วันหยุด</option><option>ร้านปิด</option><option>ไม่มีออเดอร์</option><option>สภาพอากาศ</option><option>อื่นๆ</option></select></div>
 <div class="field"><label>หมายเหตุ (ถ้ามี)</label><input id="note" placeholder="เช่น ปิดปรับปรุงร้าน"></div>
 </div>
 <button id="add">✔ บันทึก</button><div class="msg" id="msg"></div></section>
 
 <section class="card"><div class="row"><h2 style="margin:0">รายการประจำเดือน</h2>
-<div class="row noprint"><input type="month" id="month" style="width:auto"><button class="sec" id="rf">รีเฟรช</button><button id="print">พิมพ์</button></div></div>
+<div class="row noprint"><select id="fcust"></select><input type="month" id="month" style="width:auto"><button class="sec" id="rf">รีเฟรช</button><button id="print">พิมพ์</button></div></div>
 <div class="wrap" style="margin-top:10px"><table id="log"></table></div></section>
 
 <section class="card"><h2>สรุปยอดสิ้นเดือน — <span id="mlabel"></span></h2>
 <div class="mu">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="mu" id="cnt"></div><div id="daystat" style="margin-top:10px"></div>
+<h2 style="margin-top:16px">แยกตามลูกค้า (กดที่แถวเพื่อดูรายละเอียด)</h2><div class="wrap"><table id="byCust"></table></div>
 <h2 style="margin-top:16px">แยกตามหมวดหมู่</h2><div class="wrap"><table id="byCat"></table></div>
 <h2 style="margin-top:16px">แยกตามรายการ</h2><div class="wrap"><table id="byItem"></table></div>
 <h2 style="margin-top:16px">แยกตามผู้บันทึก</h2><div class="wrap"><table id="byWho"></table></div></section>
+<section class="card noprint" id="invCard"><h2>📄 ใบสรุปยอดลูกค้า (PDF)</h2><div id="invBody"></div></section>
+<section class="card noprint hide" id="custCard"><h2>⚙️ ข้อมูลลูกค้า (ผู้ดูแล)</h2>
+<div class="two"><div><label>เบอร์โทร</label><input id="cphone" inputmode="tel"></div><div><label>อีเมล</label><input id="cemail" type="email"></div></div>
+<label style="margin-top:12px">วันส่งปกติ (ไม่เลือกเลย = ทุกวัน)</label><div class="days" id="cdays"></div>
+<button id="csave" style="margin-top:12px">บันทึกข้อมูลลูกค้า</button><div class="msg" id="cmsg"></div></section>
 </div>
 </main>
 <script>
@@ -97,7 +107,78 @@ const pd=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
 const thDate=s=>{const d=pd(s);return `วัน${WD[d.getDay()]}ที่ ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()+543}`};
 const thShort=s=>{const d=pd(s);return `${WS[d.getDay()]} ${d.getDate()} ${MN[d.getMonth()]}`};
 const NO="ไม่มีการส่ง";
-let cred=null,user=null,rows=[],cat="อาหาร";
+let cred=null,user=null,rows=[],cat="อาหาร",custs=[],fc="",inv=null;
+const cn=id=>(custs.find(c=>c.id===id)||{}).name||id||"-";
+window.pick=id=>{fc=id;$("fcust").value=id;render();renderCards()};
+function fillCusts(){
+  const act=custs.filter(c=>c.active),keep=$("cust").value;let last="";try{last=localStorage.getItem("bk-cust")||""}catch(e){}
+  $("cust").innerHTML='<option value="">— เลือกลูกค้า —</option>'+act.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+  const pick=[keep,last].find(v=>v&&act.some(c=>c.id===v))||(act.length===1?act[0].id:"");
+  $("cust").value=pick;
+  $("fcust").innerHTML='<option value="">ทุกลูกค้า</option>'+custs.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}${c.active?"":" (ปิด)"}</option>`).join("");
+  $("fcust").value=fc;
+}
+$("cust").onchange=()=>{try{localStorage.setItem("bk-cust",$("cust").value)}catch(e){}};
+$("fcust").onchange=()=>{fc=$("fcust").value;render();renderCards()};
+$("addCust").onclick=async()=>{
+  const nm=(prompt("ชื่อลูกค้าใหม่")||"").trim();if(!nm)return;
+  const phone=(prompt("เบอร์โทร (ไม่บังคับ)")||"").trim();
+  try{const r=await api({action:"addCustomer",cname:nm,phone});
+    if(r.ok){await load();$("cust").value=r.id;try{localStorage.setItem("bk-cust",r.id)}catch(e){}}
+    else $("msg").textContent=r.error==="duplicate"?"มีลูกค้าชื่อนี้อยู่แล้ว":"เพิ่มลูกค้าไม่สำเร็จ ("+r.error+")"}
+  catch(e){$("msg").textContent="เพิ่มลูกค้าไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}};
+function dstat(list,withMiss,days){
+  const set=days?new Set(days.split(",")):null;const fd=new Set(list.filter(r=>r.category!==NO).map(r=>r.date)),nd={};
+  list.filter(r=>r.category===NO).forEach(r=>{nd[r.date]=r.item});
+  const [yy,mm]=$("month").value.split("-").map(Number),td=pd(today()),dim=new Date(yy,mm,0).getDate(),miss=[];
+  for(let i=1;i<=dim;i++){const ds=`${yy}-${String(mm).padStart(2,"0")}-${String(i).padStart(2,"0")}`;if(pd(ds)<td&&!fd.has(ds)&&!(ds in nd)&&(!set||set.has(String(pd(ds).getDay()))))miss.push(ds)}
+  const nds=Object.keys(nd).sort();
+  return `<div class="stat"><div class="chip">✅ มีการส่ง<b>${fd.size}</b>วัน</div><div class="chip">🚫 ไม่มีการส่ง<b>${nds.length}</b>วัน</div>${withMiss?`<div class="chip">⚠️ ยังไม่ได้บันทึก<b>${miss.length}</b>วัน</div>`:""}</div>`
+   +(nds.length?`<div class="mu" style="margin-top:8px">🚫 ไม่มีการส่ง: ${nds.map(d=>esc(thShort(d)+" ("+nd[d]+")")).join(" · ")}</div>`:"")
+   +(withMiss&&miss.length?`<div style="margin-top:8px;color:var(--dg);font-size:.9rem">⚠️ ยังไม่ได้บันทึก: ${miss.map(thShort).join(" · ")}${days?"":`<br><span class="mu">ยังไม่ได้ตั้งวันส่งปกติ ระบบจึงนับทุกวัน (ตั้งได้ที่ช่อง "ข้อมูลลูกค้า" ด้านล่าง)</span>`}</div>`:"");
+}
+const setI=t=>{const m=$("imsg");if(m)m.textContent=t};
+const mlab=()=>$("mlabel").textContent.split(" · ")[0];
+async function genInv(){
+  const b=$("igen")||$("inew");if(b)b.disabled=true;setI("กำลังสร้าง PDF...");
+  try{const r=await api({action:"invoice",cust:fc,month:$("month").value});
+    if(r.ok){inv={cust:fc,month:$("month").value,url:r.url,total:r.total};renderCards();if(!r.shared)setI("สร้างแล้ว แต่ตั้งแชร์ลิงก์ไม่สำเร็จ ลูกค้าอาจเปิดลิงก์ไม่ได้")}
+    else{setI(r.error==="empty"?"เดือนนี้ลูกค้ารายนี้ยังไม่มีรายการ":r.error==="drive"?"สร้างไม่สำเร็จ: "+(r.detail||"") +" (ผู้ดูแลต้องรันฟังก์ชัน authorize ใน Apps Script ก่อน)":"สร้างไม่สำเร็จ ("+r.error+")");if(b)b.disabled=false}}
+  catch(e){setI("สร้างไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต");if(b)b.disabled=false}
+}
+function renderCards(){
+  const c=custs.find(x=>x.id===fc),ib=$("invBody");
+  if(!c){ib.innerHTML='<div class="mu">เลือกลูกค้าที่ตัวกรองด้านบน (หรือกดชื่อลูกค้าในตารางสรุป) เพื่อสร้างใบสรุปยอดรายลูกค้า</div>'}
+  else if(inv&&inv.cust===fc&&inv.month===$("month").value){
+    ib.innerHTML=`<div><b>${esc(c.name)}</b> · ${esc(mlab())}</div><div class="mu">ยอดรวม ${fmt(inv.total)} บาท · สร้างไฟล์ PDF แล้ว</div><div class="row" style="justify-content:flex-start;margin-top:10px"><button id="iopen">เปิด PDF</button><button class="line" id="iline">ส่งทาง LINE</button>${user.role==="admin"?'<button class="mail" id="imail">ส่งอีเมล</button>':""}<button class="sec" id="icopy">คัดลอกลิงก์</button><button class="sec" id="inew">สร้างใหม่</button></div><div class="msg" id="imsg"></div>`;
+    $("iopen").onclick=()=>window.open(inv.url,"_blank");
+    $("iline").onclick=()=>window.open("https://line.me/R/share?text="+encodeURIComponent(`ใบสรุปยอดประจำเดือน ${mlab()} ของ ${c.name}\nยอดรวม ${fmt(inv.total)} บาท\n${inv.url}`),"_blank");
+    $("icopy").onclick=async()=>{try{await navigator.clipboard.writeText(inv.url);setI("คัดลอกลิงก์แล้ว")}catch(e){prompt("คัดลอกลิงก์นี้",inv.url)}};
+    $("inew").onclick=genInv;
+    if($("imail"))$("imail").onclick=async()=>{
+      const to=(prompt("ส่งอีเมลถึง",c.email||"")||"").trim();if(!to)return;setI("กำลังส่งอีเมล...");
+      try{const r=await api({action:"emailInvoice",cust:fc,month:$("month").value,to});
+        if(r.ok){setI("ส่งอีเมลถึง "+to+" แล้ว");if(!c.email)c.email=to}
+        else setI(r.error==="email"?"อีเมลไม่ถูกต้อง":r.error==="forbidden"?"เฉพาะผู้ดูแลเท่านั้น":"ส่งไม่สำเร็จ ("+(r.detail||r.error)+")")}
+      catch(e){setI("ส่งไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต")}};
+  }else{
+    ib.innerHTML=`<div><b>${esc(c.name)}</b> · ${esc(mlab())}</div><div class="mu">สร้างไฟล์ PDF ใบสรุปยอดของเดือนนี้ แล้วเลือกส่งทาง LINE หรืออีเมล</div><button id="igen" style="margin-top:10px">📄 สร้างใบสรุปยอด PDF</button><div class="msg" id="imsg"></div>`;
+    $("igen").onclick=genInv;
+  }
+  const show=!!c&&user&&user.role==="admin";$("custCard").classList.toggle("hide",!show);
+  if(show){$("cphone").value=c.phone||"";$("cemail").value=c.email||"";$("cmsg").textContent="";
+    const set=new Set((c.days||"").split(",").filter(Boolean));
+    $("cdays").innerHTML=[1,2,3,4,5,6,0].map(i=>`<button type="button" class="dy${set.has(String(i))?" on":""}" data-d="${i}">${WS[i]}</button>`).join("");
+    document.querySelectorAll("#cdays .dy").forEach(b=>b.onclick=()=>b.classList.toggle("on"));}
+}
+$("csave").onclick=async()=>{
+  const c=custs.find(x=>x.id===fc);if(!c)return;
+  const days=[...document.querySelectorAll("#cdays .dy.on")].map(b=>b.dataset.d).join(","),phone=$("cphone").value.trim(),email=$("cemail").value.trim();
+  $("cmsg").textContent="กำลังบันทึก...";
+  try{const r=await api({action:"updateCustomer",cust:fc,phone,email,days});
+    if(r.ok){c.phone=phone;c.email=email;c.days=days;$("cmsg").textContent="บันทึกแล้ว";render()}
+    else $("cmsg").textContent=r.error==="invalid"?"อีเมลหรือวันส่งไม่ถูกต้อง":"บันทึกไม่สำเร็จ ("+r.error+")"}
+  catch(e){$("cmsg").textContent="บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}};
 try{cred=JSON.parse(localStorage.getItem("bk-cred")||"null")}catch(e){}
 
 async function api(body){
@@ -125,53 +206,54 @@ async function load(){
   $("msg").textContent="กำลังโหลด...";
   try{const r=await api({action:"list",month:$("month").value});
     if(!r.ok){$("msg").textContent=r.error==="auth"?"PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่":"โหลดไม่สำเร็จ";if(r.error==="auth")$("out").click();return}
-    user=r.user;rows=r.rows;$("msg").textContent="";render()}
+    user=r.user;rows=r.rows;custs=r.customers||[];fillCusts();$("addCust").classList.toggle("hide",user.role!=="admin");$("msg").textContent="";render();renderCards()}
   catch(e){$("msg").textContent="โหลดไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}
 }
 $("month").onchange=load;$("rf").onclick=load;$("print").onclick=()=>window.print();
 $("add").onclick=async()=>{
-  const date=$("date").value,no=cat===NO;let item,qty,price;
+  const date=$("date").value,cu=$("cust").value,no=cat===NO;let item,qty,price;
+  if(!cu){$("msg").textContent="กรุณาเลือกลูกค้า";return}
   if(!date){$("msg").textContent="กรุณาเลือกวันที่";return}
   if(no){
     const nt=$("note").value.trim();item=$("reason").value+(nt?" - "+nt:"");qty=0;price=0;
-    if(rows.some(r=>r.date===date&&r.category===NO)){$("msg").textContent="วันนี้บันทึกว่าไม่มีการส่งไว้แล้ว";return}
-    if(rows.some(r=>r.date===date&&r.category!==NO)&&!confirm(thDate(date)+" มีรายการอาหารบันทึกไว้แล้ว ต้องการบันทึกว่าไม่มีการส่งด้วยหรือไม่?"))return;
+    if(rows.some(r=>r.date===date&&r.cust===cu&&r.category===NO)){$("msg").textContent="วันนี้บันทึกว่าไม่มีการส่งให้ลูกค้ารายนี้ไว้แล้ว";return}
+    if(rows.some(r=>r.date===date&&r.cust===cu&&r.category!==NO)&&!confirm(thDate(date)+" มีรายการอาหารของลูกค้ารายนี้แล้ว ต้องการบันทึกว่าไม่มีการส่งด้วยหรือไม่?"))return;
   }else{
     item=$("item").value.trim();qty=+$("qty").value||0;price=+$("price").value||0;
     if(!item){$("msg").textContent="กรุณากรอกชื่อรายการ";return}
     if(qty<=0){$("msg").textContent="จำนวนต้องมากกว่า 0";return}
   }
   $("add").disabled=true;
-  try{const r=await api({action:"add",date,item,qty,price,category:cat});
+  try{const r=await api({action:"add",date,item,qty,price,category:cat,cust:cu});
     if(r.ok){$("item").value="";$("note").value="";$("qty").value=1;calc();if(date.slice(0,7)!==$("month").value)$("month").value=date.slice(0,7);await load()}
-    else $("msg").textContent="บันทึกไม่สำเร็จ ("+r.error+")"}
+    else $("msg").textContent=r.error==="duplicate"?"บันทึกว่าไม่มีการส่งไว้แล้ว":r.error==="no_customer"?"ไม่พบลูกค้ารายนี้ หรือถูกปิดการใช้งาน":"บันทึกไม่สำเร็จ ("+r.error+")"}
   catch(e){$("msg").textContent="บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}
   $("add").disabled=false};
-window.del=async id=>{if(!confirm("ลบรายการนี้?"))return;
-  try{const r=await api({action:"delete",id});if(r.ok)load();else $("msg").textContent="ลบไม่สำเร็จ ("+r.error+")"}catch(e){$("msg").textContent="ลบไม่สำเร็จ"}};
+window.del=async(id,date)=>{if(!confirm("ลบรายการนี้?"))return;
+  try{const r=await api({action:"delete",id,date});if(r.ok)load();else $("msg").textContent="ลบไม่สำเร็จ ("+r.error+")"}catch(e){$("msg").textContent="ลบไม่สำเร็จ"}};
 
 function render(){
-  const R=[...rows].sort((a,b)=>a.date.localeCompare(b.date)||(a.ts||"").localeCompare(b.ts||""));
+  const R=rows.filter(r=>!fc||r.cust===fc).sort((a,b)=>a.date.localeCompare(b.date)||(a.ts||"").localeCompare(b.ts||""));
   const F=R.filter(r=>r.category!==NO);
   $("items").innerHTML=[...new Set(F.map(r=>r.item))].map(i=>`<option value="${esc(i)}">`).join("");
-  $("mlabel").textContent=new Date($("month").value+"-01").toLocaleDateString("th-TH",{month:"long",year:"numeric"});
+  $("mlabel").textContent=new Date($("month").value+"-01").toLocaleDateString("th-TH",{month:"long",year:"numeric"})+" · "+(fc?cn(fc):"ทุกลูกค้า");
   const dayTot={};R.forEach(r=>{dayTot[r.date]=(dayTot[r.date]||0)+r.qty*r.price});
-  let h="<tr><th>เวลา</th><th>ผู้บันทึก</th><th>หมวด</th><th>รายการ</th><th class=n>จำนวน</th><th class=n>ราคา/หน่วย</th><th class=n>รวม</th><th class=noprint></th></tr>";
-  if(!R.length)h+='<tr><td colspan="8" class="mu">ยังไม่มีรายการในเดือนนี้</td></tr>';
+  let h="<tr><th>เวลา</th><th>ลูกค้า</th><th>ผู้บันทึก</th><th>หมวด</th><th>รายการ</th><th class=n>จำนวน</th><th class=n>ราคา/หน่วย</th><th class=n>รวม</th><th class=noprint></th></tr>";
+  if(!R.length)h+='<tr><td colspan="9" class="mu">ยังไม่มีรายการในเดือนนี้</td></tr>';
   let cur="",grand=0;
   R.forEach(r=>{
-    if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="6">${thDate(r.date)}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
+    if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="7">${thDate(r.date)}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
     const t=r.qty*r.price;grand+=t;const tm=r.ts?new Date(r.ts).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):"";
     const can=r.member===user.name||user.role==="admin";
-    h+=`<tr><td>${tm}</td><td>${esc(r.member)}</td><td><span class="tag">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":r.category===NO?"🚫":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td>${r.category===NO?'<td class="n">-</td><td class="n">-</td><td class="n">-</td>':`<td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td>`}<td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}')">ลบ</button>`:""}</td></tr>`});
+    h+=`<tr><td>${tm}</td><td>${esc(cn(r.cust))}</td><td>${esc(r.member)}</td><td><span class="tag">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":r.category===NO?"🚫":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td>${r.category===NO?'<td class="n">-</td><td class="n">-</td><td class="n">-</td>':`<td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td>`}<td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}','${r.date}')">ลบ</button>`:""}</td></tr>`});
   $("log").innerHTML=h;$("grand").textContent=fmt(grand)+" บาท";
   $("cnt").textContent=`${F.length} รายการ · ${F.reduce((s,r)=>s+r.qty,0)} ชิ้น`;
-  const fd=new Set(F.map(r=>r.date)),nd={};R.filter(r=>r.category===NO).forEach(r=>{nd[r.date]=r.item});
-  const [yy,mm]=$("month").value.split("-").map(Number),td=pd(today()),dim=new Date(yy,mm,0).getDate(),miss=[];
-  for(let i=1;i<=dim;i++){const ds=`${yy}-${String(mm).padStart(2,"0")}-${String(i).padStart(2,"0")}`;if(pd(ds)<td&&!fd.has(ds)&&!(ds in nd))miss.push(ds)}
-  const nds=Object.keys(nd).sort();
-  $("daystat").innerHTML=`<div class="stat"><div class="chip">✅ มีการส่ง<b>${fd.size}</b>วัน</div><div class="chip">🚫 ไม่มีการส่ง<b>${nds.length}</b>วัน</div><div class="chip">⚠️ ยังไม่ได้บันทึก<b>${miss.length}</b>วัน</div></div>`+(nds.length?`<div class="mu" style="margin-top:8px">🚫 ไม่มีการส่ง: ${nds.map(d=>esc(thShort(d)+" ("+nd[d]+")")).join(" · ")}</div>`:"")+(miss.length?`<div style="margin-top:8px;color:var(--dg);font-size:.9rem">⚠️ ยังไม่ได้บันทึก (ไม่มีทั้งรายการและการแจ้งว่าไม่มีการส่ง): ${miss.map(thShort).join(" · ")}</div>`:"");
+  const act=custs.filter(c=>c.active||rows.some(r=>r.cust===c.id));
+  $("daystat").innerHTML=fc?dstat(rows.filter(r=>r.cust===fc),true,(custs.find(c=>c.id===fc)||{}).days):act.map(c=>`<div style="margin-bottom:12px"><b>${esc(c.name)}</b>${dstat(rows.filter(r=>r.cust===c.id),!!c.days,c.days)}</div>`).join("");
   const grp=f=>{const g={};F.forEach(r=>{const k=f(r),x=g[k]||(g[k]={q:0,t:0,n:0});x.q+=r.qty;x.t+=r.qty*r.price;x.n++});return Object.entries(g).sort((a,b)=>b[1].t-a[1].t)};
+  const all=rows.filter(r=>r.category!==NO),gt=all.reduce((s,r)=>s+r.qty*r.price,0),cg={};
+  all.forEach(r=>{const x=cg[r.cust]||(cg[r.cust]={d:new Set(),q:0,t:0});x.d.add(r.date);x.q+=r.qty;x.t+=r.qty*r.price});
+  $("byCust").innerHTML="<tr><th>ลูกค้า</th><th class=n>วันที่ส่ง</th><th class=n>จำนวนชิ้น</th><th class=n>ยอดรวม</th><th class=n>สัดส่วน</th></tr>"+(Object.entries(cg).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr style="cursor:pointer" onclick="pick('${esc(k)}')"><td><b>${esc(cn(k))}</b></td><td class="n">${v.d.size}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${gt>0?Math.round(v.t/gt*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>')+(Object.keys(cg).length>1?`<tr class="day"><td>รวมทุกลูกค้า</td><td></td><td class="n">${all.reduce((s,r)=>s+r.qty,0)}</td><td class="n">${fmt(gt)}</td><td></td></tr>`:"");
   $("byCat").innerHTML="<tr><th>หมวดหมู่</th><th class=n>รายการ</th><th class=n>จำนวนชิ้น</th><th class=n>ยอดรวม</th><th class=n>สัดส่วน</th></tr>"+(grp(r=>r.category||"ไม่ระบุหมวด").map(([k,v])=>`<tr><td><b>${esc(k)}</b></td><td class="n">${v.n}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${grand>0?Math.round(v.t/grand*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>');
   $("byItem").innerHTML="<tr><th>รายการ</th><th class=n>จำนวนรวม</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.item).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>');
   $("byWho").innerHTML="<tr><th>ผู้บันทึก</th><th class=n>จำนวนครั้ง</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.member).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.n}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>')}
