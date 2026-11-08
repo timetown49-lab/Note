@@ -15,10 +15,10 @@
 <style>
 :root{--bg:#f6f1e9;--card:#ffffff;--tx:#2d2118;--mu:#7a6a5c;--bd:#e7dccb;--field:#faf6ef;--ac:#b5601c;--ac2:#ffffff;--dg:#b3392b;
 --food:#e07a1f;--foodbg:#fff0df;--snack:#d6457f;--snackbg:#ffe6f0;--none:#6b7785;--nonebg:#eceff2;
---add:#d9822b;--list:#2f6fd0;--listbg:#e8f0fd;--sum:#23894b;--sumbg:#e5f6ec;--pdf:#7a4fd0;--pdfbg:#f0eafc;--set:#0f8b8d;--setbg:#e0f4f4;--warn:#e0a100;--warnbg:#fff4d6;--onc:#ffffff}
+--add:#d9822b;--list:#2f6fd0;--listbg:#e8f0fd;--sum:#23894b;--sumbg:#e5f6ec;--pdf:#7a4fd0;--pdfbg:#f0eafc;--set:#0f8b8d;--setbg:#e0f4f4;--due:#c0392b;--duebg:#fde7e4;--pay:#b7791f;--warn:#e0a100;--warnbg:#fff4d6;--onc:#ffffff}
 @media (prefers-color-scheme:dark){:root{--bg:#17130f;--card:#241d17;--tx:#f5ebdd;--mu:#b8a592;--bd:#43372c;--field:#1d1712;--ac:#e8934f;--ac2:#1b1510;--dg:#ff8d7d;
 --food:#f0903a;--foodbg:#3a2815;--snack:#f070a6;--snackbg:#3a1b2a;--none:#a3afbc;--nonebg:#2c333a;
---add:#e8934f;--list:#6aa4ff;--listbg:#1a2740;--sum:#55cc82;--sumbg:#16301f;--pdf:#a98bff;--pdfbg:#2a2140;--set:#4fc6c8;--setbg:#12302f;--warn:#f0b72a;--warnbg:#3a3010;--onc:#1b1510;color-scheme:dark}}
+--add:#e8934f;--list:#6aa4ff;--listbg:#1a2740;--sum:#55cc82;--sumbg:#16301f;--pdf:#a98bff;--pdfbg:#2a2140;--set:#4fc6c8;--setbg:#12302f;--due:#ff8d7d;--duebg:#3d1c18;--pay:#f0b72a;--warn:#f0b72a;--warnbg:#3a3010;--onc:#1b1510;color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:"Sarabun","Noto Sans Thai",system-ui,sans-serif;font-size:17px;line-height:1.55;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 main{max-width:860px;margin:0 auto;padding:14px}
@@ -86,6 +86,14 @@ tr.day td{background:var(--listbg);color:var(--list);font-weight:800}
 .two{align-items:end}
 .s-pdf button:not(.line):not(.mail):not(.sec){background:var(--pdf);color:var(--onc)}
 .s-set #csave{background:var(--set);color:var(--onc)}
+.s-pay{--c:var(--pay)}
+.pl{display:flex;gap:8px;flex-wrap:wrap}
+.pl-ok{background:var(--sumbg);border-color:var(--sum)}.pl-due{background:var(--duebg);border-color:var(--due)}.pl-prior{background:var(--warnbg);border-color:var(--warn)}
+.t-paid{background:var(--sumbg);color:var(--sum)}.t-due{background:var(--duebg);color:var(--due)}
+.okline{margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--sumbg);color:var(--sum);font-weight:800;font-size:1.1rem}
+.rcpt{margin-top:10px;padding:10px 12px;border:2px solid var(--bd);border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+#payOpen{width:100%;margin-top:12px;font-size:1.2rem;min-height:56px;background:var(--pay);color:var(--onc)}
+#payOk{background:linear-gradient(135deg,#d79a1c,#a66f0a);color:#fff;font-size:1.2rem;min-height:56px}
 @media (max-width:480px){th,td{padding:9px 6px;font-size:.95rem}th{font-size:.78rem}td:first-child,th:first-child{padding-left:8px}.card{padding:14px}}
 @media print{.noprint{display:none!important}body{background:#fff;color:#000}.card{border:0;box-shadow:none}.top{position:static;background:none;color:#000;box-shadow:none;margin:0 0 10px}.top .who{display:none}.hero{background:#fff;color:#000;border:2px solid #000}}
 </style>
@@ -122,11 +130,13 @@ tr.day td{background:var(--listbg);color:var(--list);font-weight:800}
 <div class="wrap" style="margin-top:10px"><table id="log"></table></div></section>
 
 <section class="card blk s-sum"><h2 class="t">📊 สรุปยอดสิ้นเดือน<br><span class="mm" id="mlabel"></span></h2>
-<div class="hero"><div class="hl">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="hs" id="cnt"></div></div><div id="daystat" style="margin-top:10px"></div>
+<div class="hero"><div class="hl">ยอดรวมทั้งเดือน</div><div class="big" id="grand">0.00 บาท</div><div class="hs" id="cnt"></div></div>
+<div class="pl" id="payline" style="margin-bottom:12px"></div><div id="daystat" style="margin-top:10px"></div>
 <h2 style="margin-top:16px">แยกตามลูกค้า (กดที่แถวเพื่อดูรายละเอียด)</h2><div class="wrap"><table id="byCust"></table></div>
 <h2 style="margin-top:16px">แยกตามหมวดหมู่</h2><div class="wrap"><table id="byCat"></table></div>
 <h2 style="margin-top:16px">แยกตามรายการ</h2><div class="wrap"><table id="byItem"></table></div>
 <h2 style="margin-top:16px">แยกตามผู้บันทึก</h2><div class="wrap"><table id="byWho"></table></div></section>
+<section class="card blk s-pay noprint" id="payCard"><h2 class="t">💰 รับชำระเงิน</h2><div id="payBody" class="form"></div></section>
 <section class="card blk s-pdf noprint" id="invCard"><h2 class="t">📄 ใบสรุปยอดลูกค้า (PDF)</h2><div id="invBody"></div></section>
 <section class="card blk s-set noprint hide" id="custCard"><h2 class="t">⚙️ ข้อมูลลูกค้า (ผู้ดูแล)</h2>
 <div class="two"><div><label>เบอร์โทร</label><input id="cphone" inputmode="tel"></div><div><label>อีเมล</label><input id="cemail" type="email"></div></div>
@@ -147,7 +157,7 @@ const pd=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
 const thDate=s=>{const d=pd(s);return `วัน${WD[d.getDay()]}ที่ ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()+543}`};
 const thShort=s=>{const d=pd(s);return `${WS[d.getDay()]} ${d.getDate()} ${MN[d.getMonth()]}`};
 const NO="ไม่มีการส่ง";
-let cred=null,user=null,rows=[],cat="อาหาร",custs=[],fc="",inv=null;
+let cred=null,user=null,rows=[],cat="อาหาร",custs=[],fc="",inv=null,pays=[],prior={};
 const cn=id=>(custs.find(c=>c.id===id)||{}).name||id||"-";
 window.pick=id=>{fc=id;$("fcust").value=id;render();renderCards()};
 function fillCusts(){
@@ -181,22 +191,50 @@ function dstat(list,withMiss,days){
    +(nds.length?`<div class="mu" style="margin-top:8px">🚫 ไม่มีการส่ง: ${nds.map(d=>esc(thShort(d)+" ("+nd[d]+")")).join(" · ")}</div>`:"")
    +(withMiss&&miss.length?`<div style="margin-top:8px;color:var(--dg);font-size:.9rem">⚠️ ยังไม่ได้บันทึก: ${miss.map(thShort).join(" · ")}${days?"":`<br><span class="mu">ยังไม่ได้ตั้งวันส่งปกติ ระบบจึงนับทุกวัน (ตั้งได้ที่ช่อง "ข้อมูลลูกค้า" ด้านล่าง)</span>`}</div>`:"");
 }
+const sum2=(a,f)=>a.filter(f).reduce((s,r)=>s+r.qty*r.price,0);
+function renderPay(){
+  const c=custs.find(x=>x.id===fc),pb=$("payBody");
+  if(!c){pb.innerHTML='<div class="mu">เลือกลูกค้าที่ตัวกรองด้านบน (หรือกดชื่อลูกค้าในตารางสรุป) เพื่อดูสถานะและรับชำระเงิน</div>';return}
+  const mine=rows.filter(r=>r.cust===fc&&r.category!==NO),tot=sum2(mine,()=>true),paid=sum2(mine,r=>r.pay),due=tot-paid,pr=prior[fc]||0,admin=user&&user.role==="admin";
+  const my=pays.filter(p=>p.cust===fc);
+  let h=`<div><b>${esc(c.name)}</b> · ${esc(mlab())}</div><div class="pl" style="margin-top:8px"><div class="chip pl-ok">🟢 ชำระแล้ว<b>${fmt(paid)}</b></div><div class="chip pl-due">🔴 ค้างเดือนนี้<b>${fmt(due)}</b></div>${pr>0.005?`<div class="chip pl-prior">🟠 ค้างเดือนก่อน<b>${fmt(pr)}</b></div>`:""}</div>`;
+  if(due>0.005){
+    h+=admin?`<button id="payOpen">💰 รับชำระทั้งเดือน (${fmt(due)} บาท)</button><div id="payForm" class="hide" style="margin-top:14px"><div class="field"><label>วันที่ชำระ</label><input type="date" id="payDate"><div class="dlabel" id="payDL"></div></div><div class="field"><label>วิธีชำระ</label><select id="payMethod"><option>เงินสด</option><option>โอนเงิน</option><option>พร้อมเพย์</option><option>อื่นๆ</option></select></div><div class="field"><label>หมายเหตุ / เลขอ้างอิงสลิป (ถ้ามี)</label><input id="payNote"></div><div class="sumbox">${fmt(due)} บาท</div><button id="payOk" style="margin-top:12px;width:100%">ยืนยันรับชำระ</button><div class="msg" id="paymsg"></div></div>`:'<div class="mu" style="margin-top:10px">เฉพาะผู้ดูแลที่บันทึกการรับชำระได้</div>';
+  }else if(tot>0)h+='<div class="okline">✅ เดือนนี้ชำระครบแล้ว</div>';
+  if(my.length){h+='<h2 style="margin-top:18px">บันทึกการรับชำระเดือนนี้</h2>'+my.map(p=>`<div class="rcpt"><div><b>${fmt(p.amount)} บาท</b> · ${esc(p.method||"-")}<div class="mu">${esc(thDate(p.date))} · โดย ${esc(p.member)}${p.note?" · "+esc(p.note):""}</div></div>${admin?`<button class="ghost pvoid" data-id="${esc(p.id)}">ยกเลิก</button>`:""}</div>`).join("")}
+  pb.innerHTML=h;
+  if($("payOpen")){
+    $("payOpen").onclick=()=>{$("payForm").classList.toggle("hide");$("payDate").value=today();$("payDL").textContent=thDate(today())};
+    $("payDate").onchange=()=>{$("payDL").textContent=$("payDate").value?thDate($("payDate").value):""};
+    $("payOk").onclick=async()=>{
+      const date=$("payDate").value;if(!date){$("paymsg").textContent="กรุณาเลือกวันที่ชำระ";return}
+      $("payOk").disabled=true;$("paymsg").textContent="กำลังบันทึก...";
+      try{const r=await api({action:"payMonth",cust:fc,month:$("month").value,date,method:$("payMethod").value,note:$("payNote").value.trim(),amount:due});
+        if(r.ok){inv=null;await load()}
+        else{$("paymsg").textContent=r.error==="changed"?"ยอดเปลี่ยนไป (มีการบันทึกเพิ่ม) กำลังโหลดใหม่ กรุณาลองอีกครั้ง":r.error==="nothing"?"ไม่มียอดค้างให้รับชำระ":r.error==="forbidden"?"เฉพาะผู้ดูแลเท่านั้น":"บันทึกไม่สำเร็จ ("+(r.detail||r.error)+")";if(r.error==="changed"||r.error==="nothing")load();$("payOk").disabled=false}}
+      catch(e){$("paymsg").textContent="บันทึกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต";$("payOk").disabled=false}};
+  }
+  document.querySelectorAll(".pvoid").forEach(b=>b.onclick=async()=>{
+    if(!confirm("ยกเลิกใบรับชำระนี้? รายการที่ผูกอยู่จะกลับเป็นค้างชำระ"))return;
+    try{const r=await api({action:"voidPayment",id:b.dataset.id});if(r.ok){inv=null;await load()}else $("msg").textContent="ยกเลิกไม่สำเร็จ ("+(r.detail||r.error)+")"}catch(e){$("msg").textContent="ยกเลิกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}});
+}
 const setI=t=>{const m=$("imsg");if(m)m.textContent=t};
 const mlab=()=>$("mlabel").textContent.split(" · ")[0];
 async function genInv(){
   const b=$("igen")||$("inew");if(b)b.disabled=true;setI("กำลังสร้าง PDF...");
   try{const r=await api({action:"invoice",cust:fc,month:$("month").value});
-    if(r.ok){inv={cust:fc,month:$("month").value,url:r.url,total:r.total};renderCards();if(!r.shared)setI("สร้างแล้ว แต่ตั้งแชร์ลิงก์ไม่สำเร็จ ลูกค้าอาจเปิดลิงก์ไม่ได้")}
+    if(r.ok){inv={cust:fc,month:$("month").value,url:r.url,total:r.total,due:r.due};renderCards();if(!r.shared)setI("สร้างแล้ว แต่ตั้งแชร์ลิงก์ไม่สำเร็จ ลูกค้าอาจเปิดลิงก์ไม่ได้")}
     else{setI(r.error==="empty"?"เดือนนี้ลูกค้ารายนี้ยังไม่มีรายการ":r.error==="drive"?"สร้างไม่สำเร็จ: "+(r.detail||"") +" (ผู้ดูแลต้องรันฟังก์ชัน authorize ใน Apps Script ก่อน)":"สร้างไม่สำเร็จ ("+r.error+")");if(b)b.disabled=false}}
   catch(e){setI("สร้างไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต");if(b)b.disabled=false}
 }
 function renderCards(){
+  renderPay();
   const c=custs.find(x=>x.id===fc),ib=$("invBody");
   if(!c){ib.innerHTML='<div class="mu">เลือกลูกค้าที่ตัวกรองด้านบน (หรือกดชื่อลูกค้าในตารางสรุป) เพื่อสร้างใบสรุปยอดรายลูกค้า</div>'}
   else if(inv&&inv.cust===fc&&inv.month===$("month").value){
-    ib.innerHTML=`<div><b>${esc(c.name)}</b> · ${esc(mlab())}</div><div class="mu">ยอดรวม ${fmt(inv.total)} บาท · สร้างไฟล์ PDF แล้ว</div><div class="row" style="justify-content:flex-start;margin-top:10px"><button id="iopen">เปิด PDF</button><button class="line" id="iline">ส่งทาง LINE</button>${user.role==="admin"?'<button class="mail" id="imail">ส่งอีเมล</button>':""}<button class="sec" id="icopy">คัดลอกลิงก์</button><button class="sec" id="inew">สร้างใหม่</button></div><div class="msg" id="imsg"></div>`;
+    ib.innerHTML=`<div><b>${esc(c.name)}</b> · ${esc(mlab())}</div><div class="mu">ยอดรวมเดือนนี้ ${fmt(inv.total)} · ยอดที่ต้องชำระ ${fmt(inv.due)} บาท · สร้างไฟล์ PDF แล้ว</div><div class="row" style="justify-content:flex-start;margin-top:10px"><button id="iopen">เปิด PDF</button><button class="line" id="iline">ส่งทาง LINE</button>${user.role==="admin"?'<button class="mail" id="imail">ส่งอีเมล</button>':""}<button class="sec" id="icopy">คัดลอกลิงก์</button><button class="sec" id="inew">สร้างใหม่</button></div><div class="msg" id="imsg"></div>`;
     $("iopen").onclick=()=>window.open(inv.url,"_blank");
-    $("iline").onclick=()=>window.open("https://line.me/R/share?text="+encodeURIComponent(`ใบสรุปยอดประจำเดือน ${mlab()} ของ ${c.name}\nยอดรวม ${fmt(inv.total)} บาท\n${inv.url}`),"_blank");
+    $("iline").onclick=()=>window.open("https://line.me/R/share?text="+encodeURIComponent(`ใบสรุปยอดประจำเดือน ${mlab()} ของ ${c.name}\nยอดรวมเดือนนี้ ${fmt(inv.total)} บาท\nยอดที่ต้องชำระ ${fmt(inv.due)} บาท\n${inv.url}`),"_blank");
     $("icopy").onclick=async()=>{try{await navigator.clipboard.writeText(inv.url);setI("คัดลอกลิงก์แล้ว")}catch(e){prompt("คัดลอกลิงก์นี้",inv.url)}};
     $("inew").onclick=genInv;
     if($("imail"))$("imail").onclick=async()=>{
@@ -250,7 +288,7 @@ async function load(){
   $("msg").textContent="กำลังโหลด...";
   try{const r=await api({action:"list",month:$("month").value});
     if(!r.ok){$("msg").textContent=r.error==="auth"?"PIN ถูกเปลี่ยน กรุณาเข้าสู่ระบบใหม่":"โหลดไม่สำเร็จ";if(r.error==="auth")$("out").click();return}
-    user=r.user;rows=r.rows;custs=r.customers||[];fillCusts();$("addCust").classList.toggle("hide",user.role!=="admin");$("addHint").classList.toggle("hide",user.role==="admin");$("msg").textContent="";render();renderCards()}
+    user=r.user;rows=r.rows;custs=r.customers||[];pays=r.payments||[];prior=r.prior||{};fillCusts();$("addCust").classList.toggle("hide",user.role!=="admin");$("addHint").classList.toggle("hide",user.role==="admin");$("msg").textContent="";render();renderCards()}
   catch(e){$("msg").textContent="โหลดไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}
 }
 $("month").onchange=load;$("rf").onclick=load;$("print").onclick=()=>window.print();
@@ -282,22 +320,25 @@ function render(){
   $("items").innerHTML=[...new Set(F.map(r=>r.item))].map(i=>`<option value="${esc(i)}">`).join("");
   $("mlabel").textContent=new Date($("month").value+"-01").toLocaleDateString("th-TH",{month:"long",year:"numeric"})+" · "+(fc?cn(fc):"ทุกลูกค้า");
   const dayTot={};R.forEach(r=>{dayTot[r.date]=(dayTot[r.date]||0)+r.qty*r.price});
-  let h="<tr><th>เวลา</th><th>ลูกค้า</th><th>ผู้บันทึก</th><th>หมวด</th><th>รายการ</th><th class=n>จำนวน</th><th class=n>ราคา/หน่วย</th><th class=n>รวม</th><th class=noprint></th></tr>";
-  if(!R.length)h+='<tr><td colspan="9" class="mu">ยังไม่มีรายการในเดือนนี้</td></tr>';
+  let h="<tr><th>เวลา</th><th>ลูกค้า</th><th>ผู้บันทึก</th><th>หมวด</th><th>รายการ</th><th class=n>จำนวน</th><th class=n>ราคา/หน่วย</th><th class=n>รวม</th><th>ชำระ</th><th class=noprint></th></tr>";
+  if(!R.length)h+='<tr><td colspan="10" class="mu">ยังไม่มีรายการในเดือนนี้</td></tr>';
   let cur="",grand=0;
   R.forEach(r=>{
-    if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="7">${thDate(r.date)}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
+    if(r.date!==cur){cur=r.date;h+=`<tr class="day"><td colspan="8">${thDate(r.date)}</td><td class="n">${fmt(dayTot[r.date])}</td><td class="noprint"></td></tr>`}
     const t=r.qty*r.price;grand+=t;const tm=r.ts?new Date(r.ts).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):"";
-    const can=r.member===user.name||user.role==="admin";
-    h+=`<tr class="${r.category==="ขนม"?"rs":r.category===NO?"rn":"rf"}"><td>${tm}</td><td>${esc(cn(r.cust))}</td><td>${esc(r.member)}</td><td><span class="tag ${r.category==="ขนม"?"t-snack":r.category===NO?"t-none":"t-food"}">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":r.category===NO?"🚫":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td>${r.category===NO?'<td class="n">-</td><td class="n">-</td><td class="n">-</td>':`<td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td>`}<td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}','${r.date}')">ลบ</button>`:""}</td></tr>`});
+    const can=!r.pay&&(r.member===user.name||user.role==="admin");
+    h+=`<tr class="${r.category==="ขนม"?"rs":r.category===NO?"rn":"rf"}"><td>${tm}</td><td>${esc(cn(r.cust))}</td><td>${esc(r.member)}</td><td><span class="tag ${r.category==="ขนม"?"t-snack":r.category===NO?"t-none":"t-food"}">${r.category==="ขนม"?"🧁":r.category==="อาหาร"?"🍛":r.category===NO?"🚫":""} ${esc(r.category||"-")}</span></td><td>${esc(r.item)}</td>${r.category===NO?'<td class="n">-</td><td class="n">-</td><td class="n">-</td>':`<td class="n">${r.qty}</td><td class="n">${fmt(r.price)}</td><td class="n">${fmt(t)}</td>`}<td>${r.category===NO?"":r.pay?'<span class="tag t-paid">ชำระแล้ว</span>':'<span class="tag t-due">ค้าง</span>'}</td><td class="noprint">${can?`<button class="ghost" onclick="del('${esc(r.id)}','${r.date}')">ลบ</button>`:""}</td></tr>`});
   $("log").innerHTML=h;$("grand").textContent=fmt(grand)+" บาท";
   $("cnt").textContent=`${F.length} รายการ · ${F.reduce((s,r)=>s+r.qty,0)} ชิ้น`;
+  const ptot=sum2(F,()=>true),ppaid=sum2(F,r=>r.pay),pprior=fc?(prior[fc]||0):Object.values(prior).reduce((s,v)=>s+v,0);
+  $("payline").innerHTML=`<div class="chip pl-ok">🟢 ชำระแล้ว<b>${fmt(ppaid)}</b></div><div class="chip pl-due">🔴 ค้างเดือนนี้<b>${fmt(ptot-ppaid)}</b></div>`+(pprior>0.005?`<div class="chip pl-prior">🟠 ค้างเดือนก่อน<b>${fmt(pprior)}</b></div>`:"");
   const act=custs.filter(c=>c.active||rows.some(r=>r.cust===c.id));
   $("daystat").innerHTML=fc?dstat(rows.filter(r=>r.cust===fc),true,(custs.find(c=>c.id===fc)||{}).days):act.map(c=>`<div style="margin-bottom:12px"><b>${esc(c.name)}</b>${dstat(rows.filter(r=>r.cust===c.id),!!c.days,c.days)}</div>`).join("");
   const grp=f=>{const g={};F.forEach(r=>{const k=f(r),x=g[k]||(g[k]={q:0,t:0,n:0});x.q+=r.qty;x.t+=r.qty*r.price;x.n++});return Object.entries(g).sort((a,b)=>b[1].t-a[1].t)};
-  const all=rows.filter(r=>r.category!==NO),gt=all.reduce((s,r)=>s+r.qty*r.price,0),cg={};
-  all.forEach(r=>{const x=cg[r.cust]||(cg[r.cust]={d:new Set(),q:0,t:0});x.d.add(r.date);x.q+=r.qty;x.t+=r.qty*r.price});
-  $("byCust").innerHTML="<tr><th>ลูกค้า</th><th class=n>วัน</th><th class=n>ชิ้น</th><th class=n>ยอดรวม</th><th class=n>%</th></tr>"+(Object.entries(cg).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr style="cursor:pointer" onclick="pick('${esc(k)}')"><td><b>${esc(cn(k))}</b></td><td class="n">${v.d.size}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${gt>0?Math.round(v.t/gt*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>')+(Object.keys(cg).length>1?`<tr class="day"><td>รวมทุกลูกค้า</td><td></td><td class="n">${all.reduce((s,r)=>s+r.qty,0)}</td><td class="n">${fmt(gt)}</td><td></td></tr>`:"");
+  const all=rows.filter(r=>r.category!==NO),cg={};
+  all.forEach(r=>{const x=cg[r.cust]||(cg[r.cust]={t:0,p:0}),v=r.qty*r.price;x.t+=v;if(r.pay)x.p+=v});
+  const gt=sum2(all,()=>true),gp=sum2(all,r=>r.pay);
+  $("byCust").innerHTML="<tr><th>ลูกค้า</th><th class=n>ยอดรวม</th><th class=n>ชำระแล้ว</th><th class=n>ค้าง</th></tr>"+(Object.entries(cg).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr style="cursor:pointer" onclick="pick('${esc(k)}')"><td><b>${esc(cn(k))}</b></td><td class="n">${fmt(v.t)}</td><td class="n" style="color:var(--sum)">${fmt(v.p)}</td><td class="n" style="color:${v.t-v.p>0.005?"var(--due)":"var(--mu)"};font-weight:700">${fmt(v.t-v.p)}</td></tr>`).join("")||'<tr><td colspan="4" class="mu">-</td></tr>')+(Object.keys(cg).length>1?`<tr class="day"><td>รวมทุกลูกค้า</td><td class="n">${fmt(gt)}</td><td class="n">${fmt(gp)}</td><td class="n">${fmt(gt-gp)}</td></tr>`:"");
   $("byCat").innerHTML="<tr><th>หมวด</th><th class=n>ครั้ง</th><th class=n>ชิ้น</th><th class=n>ยอดรวม</th><th class=n>%</th></tr>"+(grp(r=>r.category||"ไม่ระบุหมวด").map(([k,v])=>`<tr><td><span class="dot" style="background:${k==="ขนม"?"var(--snack)":k==="อาหาร"?"var(--food)":"var(--none)"}"></span><b>${esc(k)}</b></td><td class="n">${v.n}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td><td class="n">${grand>0?Math.round(v.t/grand*100)+"%":"-"}</td></tr>`).join("")||'<tr><td colspan="5" class="mu">-</td></tr>');
   $("byItem").innerHTML="<tr><th>รายการ</th><th class=n>จำนวนรวม</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.item).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.q}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>');
   $("byWho").innerHTML="<tr><th>ผู้บันทึก</th><th class=n>จำนวนครั้ง</th><th class=n>ยอดรวม</th></tr>"+(grp(r=>r.member).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v.n}</td><td class="n">${fmt(v.t)}</td></tr>`).join("")||'<tr><td colspan="3" class="mu">-</td></tr>')}
