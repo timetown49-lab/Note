@@ -150,7 +150,8 @@ button.pitems{background:var(--sum);color:var(--onc)}
 <section class="card blk s-set noprint hide" id="custCard"><h2 class="t">⚙️ ข้อมูลลูกค้า (ผู้ดูแล)</h2>
 <div class="two"><div><label>เบอร์โทร</label><input id="cphone" inputmode="tel"></div><div><label>อีเมล</label><input id="cemail" type="email"></div></div>
 <label style="margin-top:12px">วันส่งปกติ (ไม่เลือกเลย = ทุกวัน)</label><div class="days" id="cdays"></div>
-<button id="csave" style="margin-top:12px">บันทึกข้อมูลลูกค้า</button><div class="msg" id="cmsg"></div></section>
+<button id="csave" style="margin-top:12px">บันทึกข้อมูลลูกค้า</button><div class="msg" id="cmsg"></div>
+<div id="vlBox"></div></section>
 </div>
 </main>
 <script>
@@ -277,6 +278,33 @@ function renderPay(){
     if(!confirm("ยกเลิกใบรับชำระนี้? รายการที่ผูกอยู่จะกลับเป็นค้างชำระ"))return;
     try{const r=await api({action:"voidPayment",id:b.dataset.id});if(r.ok){inv=null;await load()}else $("msg").textContent="ยกเลิกไม่สำเร็จ ("+(r.detail||r.error)+")"}catch(e){$("msg").textContent="ยกเลิกไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต"}});
 }
+const VIEW_BASE="https://timetown49-lab.github.io/Note/view.html";
+let vl={cust:null,token:"",pin:""};
+const vlUrl=()=>VIEW_BASE+"?t="+vl.token;
+const lineShare=t=>window.open("https://line.me/R/share?text="+encodeURIComponent(t),"_blank");
+const vlMsg=t=>{const m=$("vlmsg");if(m)m.textContent=t};
+async function vlCall(body){
+  vlMsg("กำลังทำงาน...");
+  try{const r=await api({...body,cust:fc});
+    if(r.ok){vl={cust:fc,token:r.token!==undefined?r.token:vl.token,pin:r.pin!==undefined?r.pin:vl.pin};renderVL()}
+    else vlMsg(r.error==="invalid"?"PIN ต้องเป็นตัวเลข 4-8 หลัก":"ทำรายการไม่สำเร็จ ("+(r.detail||r.error)+")")}
+  catch(e){vlMsg("ทำรายการไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต")}
+}
+function renderVL(){
+  const box=$("vlBox"),c=custs.find(x=>x.id===fc);if(!box||!c)return;
+  const head='<h2 style="margin-top:22px">🔗 ลิงก์ให้ลูกค้าดูข้อมูล (ต้องใส่ PIN)</h2>';
+  if(vl.cust!==fc){box.innerHTML=head+'<button class="sec" id="vlLoad">ดู / จัดการลิงก์ลูกค้า</button><div class="msg" id="vlmsg"></div>';$("vlLoad").onclick=()=>vlCall({action:"viewLinkInfo"});return}
+  if(!vl.token){
+    box.innerHTML=head+'<div class="mu">ยังไม่ได้เปิดใช้ลิงก์สำหรับลูกค้ารายนี้</div><div class="field" style="margin-top:10px"><label>PIN ของลูกค้า 4-8 หลัก (เว้นว่าง = ให้ระบบสุ่ม)</label><input id="vlPin" inputmode="numeric"></div><button id="vlOn">เปิดใช้ลิงก์ลูกค้า</button><div class="msg" id="vlmsg"></div>';
+    $("vlOn").onclick=()=>vlCall({action:"createViewLink",mode:"both",vpin:$("vlPin").value.trim()});return}
+  box.innerHTML=head+`<label>ลิงก์สำหรับลูกค้า</label><input id="vlLink" readonly value="${esc(vlUrl())}"><div class="sumbox" style="margin-top:10px;font-size:1.4rem">PIN: ${esc(vl.pin)}</div><div class="row" style="justify-content:flex-start;margin-top:10px"><button class="line" id="vlLineLink">ส่งลิงก์ทาง LINE</button><button class="line" id="vlLinePin">ส่ง PIN ทาง LINE</button><button class="sec" id="vlCopy">คัดลอกลิงก์</button></div><div class="row" style="justify-content:flex-start;margin-top:10px"><button class="sec" id="vlNewLink">สร้างลิงก์ใหม่</button><button class="sec" id="vlNewPin">เปลี่ยน PIN</button><button class="ghost" id="vlOff">ปิดการเข้าถึง</button></div><div class="msg" id="vlmsg"></div>`;
+  $("vlLineLink").onclick=()=>lineShare(`ลิงก์ดูยอดและรายการของ ${c.name}\n${vlUrl()}\n(PIN จะส่งแยกให้ครับ)`);
+  $("vlLinePin").onclick=()=>lineShare(`PIN สำหรับเปิดลิงก์ดูยอดของ ${c.name}: ${vl.pin}`);
+  $("vlCopy").onclick=async()=>{try{await navigator.clipboard.writeText(vlUrl());vlMsg("คัดลอกลิงก์แล้ว")}catch(e){prompt("คัดลอกลิงก์นี้",vlUrl())}};
+  $("vlNewLink").onclick=()=>{if(confirm("สร้างลิงก์ใหม่? ลิงก์เดิมจะใช้ไม่ได้ทันที"))vlCall({action:"createViewLink",mode:"link"})};
+  $("vlNewPin").onclick=()=>{if(confirm("เปลี่ยน PIN เป็นเลขสุ่มใหม่? PIN เดิมจะใช้ไม่ได้ทันที"))vlCall({action:"createViewLink",mode:"pin"})};
+  $("vlOff").onclick=()=>{if(confirm("ปิดการเข้าถึง? ลูกค้าจะเปิดลิงก์เดิมไม่ได้อีก"))vlCall({action:"disableViewLink"})};
+}
 const setI=t=>{const m=$("imsg");if(m)m.textContent=t};
 const mlab=()=>$("mlabel").textContent.split(" · ")[0];
 async function genInv(){
@@ -310,7 +338,7 @@ function renderCards(){
   if(show){$("cphone").value=c.phone||"";$("cemail").value=c.email||"";$("cmsg").textContent="";
     const set=new Set((c.days||"").split(",").filter(Boolean));
     $("cdays").innerHTML=[1,2,3,4,5,6,0].map(i=>`<button type="button" class="dy${set.has(String(i))?" on":""}" data-d="${i}">${WS[i]}</button>`).join("");
-    document.querySelectorAll("#cdays .dy").forEach(b=>b.onclick=()=>b.classList.toggle("on"));}
+    document.querySelectorAll("#cdays .dy").forEach(b=>b.onclick=()=>b.classList.toggle("on"));renderVL();}
 }
 $("csave").onclick=async()=>{
   const c=custs.find(x=>x.id===fc);if(!c)return;
