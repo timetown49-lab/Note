@@ -92,7 +92,7 @@ tr.day td{background:var(--listbg);color:var(--list);font-weight:800}
 .t-paid{background:var(--sumbg);color:var(--sum)}.t-due{background:var(--duebg);color:var(--due)}
 .okline{margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--sumbg);color:var(--sum);font-weight:800;font-size:1.1rem}
 .rcpt{margin-top:10px;padding:10px 12px;border:2px solid var(--bd);border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-#payOpen{width:100%;margin-top:12px;font-size:1.2rem;min-height:56px;background:var(--pay);color:var(--onc)}
+#payAll{background:var(--pay);color:var(--onc);font-size:1.2rem;min-height:58px}
 #payOk{background:linear-gradient(135deg,#d79a1c,#a66f0a);color:#fff;font-size:1.2rem;min-height:56px}
 input.selc{width:24px;height:24px;padding:0;border:0;vertical-align:middle;accent-color:var(--pay);margin-right:6px}
 .pl-lump{background:var(--pdfbg);border-color:var(--pdf)}
@@ -202,7 +202,7 @@ function dstat(list,withMiss,days){
 }
 const sum2=(a,f)=>a.filter(f).reduce((s,r)=>s+r.qty*r.price,0);
 const dueText=v=>v>=0.005?"ยอดที่ต้องชำระ "+fmt(v)+" บาท":v<=-0.005?"เครดิตคงเหลือ "+fmt(-v)+" บาท":"ไม่มียอดค้างชำระ";
-const TYPEN={month:"ทั้งเดือน",items:"บางรายการ",lump:"ไม่ระบุรายการ"};
+const TYPEN={all:"ทั้งหมด",month:"ทั้งเดือน",items:"บางรายการ",lump:"ไม่ระบุรายการ"};
 const selSum=()=>sum2(rows.filter(r=>sel.has(r.id)),()=>true);
 function wireSel(){
   document.querySelectorAll(".selc").forEach(cb=>cb.onchange=()=>{if(cb.checked)sel.add(cb.dataset.id);else sel.delete(cb.dataset.id);updSel()});
@@ -220,9 +220,9 @@ function showPayForm(){
   if(!payMode){f.classList.add("hide");return}
   f.classList.remove("hide");
   const lump=payMode==="lump";
-  $("payTitle").textContent=payMode==="month"?"รับชำระทั้งเดือน":payMode==="items"?"รับชำระรายการที่เลือก ("+sel.size+" รายการ)":"รับชำระแบบไม่ระบุรายการ (โอนเป็นก้อน)";
+  $("payTitle").textContent=payMode==="all"?"รับชำระทั้งหมด (รวมยอดค้างเดือนก่อน)":payMode==="month"?"รับชำระเฉพาะเดือนนี้":payMode==="items"?"รับชำระรายการที่เลือก ("+sel.size+" รายการ)":"รับชำระแบบไม่ระบุรายการ (โอนเป็นก้อน)";
   $("payAmt").classList.toggle("hide",!lump);$("payAmtShow").classList.toggle("hide",lump);
-  if(!lump){const mine=rows.filter(r=>r.cust===fc&&r.category!==NO);$("payAmtShow").textContent=fmt(payMode==="month"?sum2(mine,r=>!r.pay):selSum())+" บาท"}
+  if(!lump){const mine=rows.filter(r=>r.cust===fc&&r.category!==NO);$("payAmtShow").textContent=fmt(payMode==="month"?sum2(mine,r=>!r.pay):payMode==="all"?sum2(mine,r=>!r.pay)+(prior[fc]||0):selSum())+" บาท"}
   if(!$("payDate").value){$("payDate").value=today();$("payDL").textContent=thDate(today())}
 }
 function renderPay(){
@@ -232,10 +232,12 @@ function renderPay(){
   const keep={d:$("payDate")?$("payDate").value:"",m:$("payMethod")?$("payMethod").value:"",n:$("payNote")?$("payNote").value:"",a:$("payAmt")?$("payAmt").value:""};
   if(payMode==="items"&&!sel.size)payMode="";
   if(payMode==="month"&&due<=0.005)payMode="";
+  if(payMode==="all"&&due+pr<=0.005)payMode="";
   const my=pays.filter(p=>p.cust===fc);
   let h=`<div><b>${esc(c.name)}</b> · ${esc(mlab())}</div><div class="pl" style="margin-top:8px"><div class="chip pl-ok">🟢 ชำระแล้ว<b>${fmt(paid)}</b></div><div class="chip pl-due">🔴 ค้างเดือนนี้<b>${fmt(due)}</b></div>${pr>0.005?`<div class="chip pl-prior">🟠 ค้างเดือนก่อน<b>${fmt(pr)}</b></div>`:""}${lp>0.005?`<div class="chip pl-lump">🟣 ชำระไม่ระบุรายการ<b>${fmt(lp)}</b></div>`:""}</div><div class="netline ${net>0.005?"due":"ok"}">💳 ${dueText(net)}</div>`;
   if(admin){
-    if(due>0.005)h+=`<button class="pbtn" id="payOpen">💰 รับชำระทั้งเดือน (${fmt(due)} บาท)</button>`;
+    if(due+pr>0.005)h+=`<button class="pbtn" id="payAll">💰 รับชำระทั้งหมด (${fmt(due+pr)} บาท)${pr>0.005?" · รวมค้างเดือนก่อน":""}</button>`;
+    if(due>0.005&&pr>0.005)h+=`<button class="pbtn sec" id="payOpen">รับชำระเฉพาะเดือนนี้ (${fmt(due)} บาท)</button>`;
     if(sel.size)h+=`<button class="pbtn pitems" id="payItems">✅ รับชำระรายการที่เลือก (${sel.size} รายการ · ${fmt(selSum())} บาท)</button>`;
     h+=`<button class="pbtn sec" id="payLump">📥 รับชำระแบบไม่ระบุรายการ (โอนเป็นก้อน)</button>`;
     h+=`<div id="payForm" class="hide" style="margin-top:14px;padding:14px;border:2px dashed var(--pay);border-radius:14px"><div id="payTitle" style="font-weight:800;font-size:1.1rem;margin-bottom:12px"></div><div class="field"><label>วันที่ชำระ</label><input type="date" id="payDate"><div class="dlabel" id="payDL"></div></div><div class="field"><label>วิธีชำระ</label><select id="payMethod"><option>เงินสด</option><option>โอนเงิน</option><option>พร้อมเพย์</option><option>อื่นๆ</option></select></div><div class="field"><label>หมายเหตุ / เลขอ้างอิงสลิป (ถ้ามี)</label><input id="payNote"></div><div class="field"><label>ยอดเงิน</label><div class="sumbox" id="payAmtShow"></div><input type="number" id="payAmt" class="hide" min="1" step="0.01" inputmode="decimal" placeholder="ยอดที่ได้รับ (บาท)"></div><button id="payOk" style="width:100%">ยืนยันรับชำระ</button><div class="msg" id="paymsg"></div></div>`;
@@ -244,6 +246,7 @@ function renderPay(){
   else if(admin&&tot>0&&due<=0.005)h+='<div class="okline">✅ รายการเดือนนี้ชำระครบแล้ว</div>';
   if(my.length){h+='<h2 style="margin-top:18px">บันทึกการรับชำระเดือนนี้</h2>'+my.map(p=>`<div class="rcpt"><div><b>${fmt(p.amount)} บาท</b> · ${esc(p.method||"-")} <span class="tag t-none">${TYPEN[p.type]||"ทั้งเดือน"}</span><div class="mu">${esc(thDate(p.date))} · โดย ${esc(p.member)}${p.note?" · "+esc(p.note):""}</div></div>${admin?`<button class="ghost pvoid" data-id="${esc(p.id)}">ยกเลิก</button>`:""}</div>`).join("")}
   pb.innerHTML=h;
+  if($("payAll"))$("payAll").onclick=()=>openPay("all");
   if($("payOpen"))$("payOpen").onclick=()=>openPay("month");
   if($("payItems"))$("payItems").onclick=()=>openPay("items");
   if($("payLump"))$("payLump").onclick=()=>openPay("lump");
@@ -256,6 +259,7 @@ function renderPay(){
       const base={cust:fc,month:$("month").value,date,method:$("payMethod").value,note:$("payNote").value.trim()};
       let body;
       if(payMode==="month")body={...base,action:"payMonth",amount:due};
+      else if(payMode==="all")body={...base,action:"payAll",amount:due+pr};
       else if(payMode==="items")body={...base,action:"payItems",ids:[...sel],amount:selSum()};
       else{const a=+$("payAmt").value;
         if(!(a>0)){$("paymsg").textContent="กรุณากรอกยอดเงินที่ได้รับ";return}
